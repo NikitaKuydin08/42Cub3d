@@ -1,0 +1,47 @@
+## int correct_permission(t_data *data, char **argv)
+
+ - argv[1] isn't NULL
+ - filename ends only in **.cub**
+ - no filename just .cub alone -> fail
+ - file exists and open() successfuly with read permissions
+ - file is not a directory
+ - file is not empty
+
+## int	textures_path_vaild(t_data *data, int fd_map)
+
+for each texture identifier:
+ - identifier appers exactly once
+ - identfier is in uppercase, two chars
+ - identifier followed by at least one whitespace (1+)
+ - the file might be open, read and is non-empty
+ - path ends in .png
+ - not a directody
+ - (trailing characters) - mistake
+
+for the whole map:
+ - no missing identifiers
+
+## int	floor_ceil_rgb_valid(t_data *data, int fd_map)
+
+for each of **F** and **C**:
+ - identifier appears exactly once each
+ - the letter must be followed by at least one space (1+)
+ - rgb value is 3 comma-separated integers 
+ - each integer is purely a number, no signs, no periods, no chars
+ - each integer is in the range 0 - 255
+ - we would tolerate all the spaces (1+), it's not a mistake
+ - (trailing characters) - mistake
+
+for the whole map:
+ - no missing **F** or/and **C**
+
+## int	map_valid(t_data *data, int fd_map)
+
+ - File is not empty
+
+**position in file**:
+ - map isn't first or in the middle -> should be at the end of the file
+ - map exists
+ - any letters(non-empty lines) after the map -> fail
+ - 
+
