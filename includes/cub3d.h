@@ -28,6 +28,7 @@
 # define FILE_NOT_EXIST "File doesn't exist"
 # define FILE_NOT_REGULAR "File is not a regular file"
 # define WRONG_FILE_EXT "FIle has wrong extension, not .cub"
+# define WRONG_TEX_EXT "Not a .png file"
 # define OPEN_FILE_ERR "Couldn't open the file, wrong permissions"
 # define FILE_IS_EMPTY "File is empty"
 
@@ -39,13 +40,19 @@ typedef struct	s_data
 	int		win_width;
 }	t_data;
 
+typedef	struct s_texrgbinfo
+{
+	
+}	t_texrgbinfo;
+
+
 void	init_data(t_data *data);
 void	init_mlx(t_data *cub3d);
 
 void	ft_error(t_data *data, int exit_code);
 
 // VALIDATION //
-int	check_file(char **argv);
+int	check_file(char *arg, bool cub);
 int	parsing(t_data *data, char **argv);
 
 

@@ -1,23 +1,19 @@
 
-
-
 NAME = cub3D
 
 CC = cc
-MLXFL = libmlx42.a -Iinclude -lglfw
 CFLAGS = -Wall -Wextra -Werror
 MLX_DIR = ./MLX42
 LIBFT_DIR = ./libft
-OBJ_DIR = ./objects/
-SRCS_DIR = ./srcs/
+OBJ_DIR = objects/
+SRCS_DIR = srcs/
 
-BREW_PREFIX = $(shell brew --prefix)
-HEADERS = -I ${MLX_DIR}/include -I ${LIBFT_DIR} -I ${BREW_PREFIX}/include
-LIBS = ${MLX_DIR}/build/libmlx42.a ${LIBFT_DIR}/libft.a -L ${BREW_PREFIX}/lib -ldl -lglfw -pthread -lm
+HEADERS = -I ${MLX_DIR}/include -I ${LIBFT_DIR}
+LIBS = ${MLX_DIR}/build/libmlx42.a ${LIBFT_DIR}/libft.a -pthread -lm -lglfw
 SRC = main.c \
 	init.c \
-	validation/permission.c \
-	validation/validate.c \
+	parsing/permission.c \
+	parsing/validate.c \
 	utils/error.c
 
 SRCS = ${addprefix $(SRCS_DIR), $(SRC)}
@@ -35,7 +31,7 @@ ${NAME}: ${OBJS}
 	${CC} ${CFLAGS} ${OBJS} ${LIBS} -o $@
 
 # Compile object files
-$(OBJ_DIR)%.o: srcs/%.c
+$(OBJ_DIR)%.o: $(SRCS_DIR)%.c
 	@mkdir -p $(dir $@)
 	${CC} ${CFLAGS} ${HEADERS} -c $< -o $@
 
@@ -47,9 +43,6 @@ libft:
 mlx:
 	@cmake -S ${MLX_DIR} -B ${MLX_DIR}/build
 	@cmake --build ${MLX_DIR}/build -j4
-
-bonus:
-
 
 # Clean objects
 clean:

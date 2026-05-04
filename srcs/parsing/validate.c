@@ -51,12 +51,3 @@ of your choice.
 
 // }
 
-int	parsing(t_data *data, char **argv)
-{
-	(void)data;
-    if (check_file(argv))
-        return (1);
-    
-
-	return (0);
-}

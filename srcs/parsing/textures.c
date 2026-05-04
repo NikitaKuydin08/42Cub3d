@@ -1,32 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   error.c                                            :+:      :+:    :+:   */
+/*   textures.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: Nikita_Kuydin <nikitakuydin@qmail.com>     #+#  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026-05-02 07:12:57 by Nikita_Kuydin     #+#    #+#             */
-/*   Updated: 2026-05-02 07:12:57 by Nikita_Kuydin    ###   ########.fr       */
+/*   Created: 2026-05-04 04:31:48 by Nikita_Kuydin     #+#    #+#             */
+/*   Updated: 2026-05-04 04:31:48 by Nikita_Kuydin    ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/cub3d.h"
 
-int print_err_msg(char *msg)
-{
-	ft_putstr_fd("Error", 2);
-	ft_putstr_fd(msg, 2);
-	return (1);
-}
+/*
+2 functions used to validate F and C
+    - if the numbers are valid
+*/
 
-void	ft_error(t_data *data, int exit_code)
-{
-	if (!data)
-		exit(exit_code);
-	if (data->image && data->mlx)
-		mlx_delete_image(data->mlx, data->image);
-	if (data->mlx)
-		mlx_close_window(data->mlx);
-	// free_data(data); TODO
-	exit(exit_code);
-}
+int textures_path()

@@ -30,8 +30,20 @@ W for spawning a player looking west
 */
 
 /*
+	- Digital Differential Analysis (DDA) algorithm
+
 Valid map is it has 
 */
+
+int	parsing(t_data *data, char **argv)
+{
+	(void)data;
+    if (check_file(argv[1], true))
+        ft_error(data, 1);
+    
+
+	return (0);
+}
 
 int	main(int argc, char **argv)
 {

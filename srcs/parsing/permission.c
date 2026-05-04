@@ -12,7 +12,13 @@
 
 #include "../includes/cub3d.h"
 
-static int	wrong_extension(char *filename)
+/*
+	- bool cub used to determinee what type of file have been passed
+	- checkfile function checks if the file has read permissions,
+	not empty, not a directory. 
+*/
+
+static int	wrong_cub(char *filename)
 {
 	int	len;
 
@@ -24,20 +30,32 @@ static int	wrong_extension(char *filename)
 	return (0);
 }
 
-int	check_file(char **argv)
+static int	wrong_png(char *filename)
 {
-	char		*filename;
+	int	len;
+
+	len = ft_strlen(filename);
+	if (len <= 4)
+		return (1);
+	if (ft_strncmp(filename + len - 4, ".png", 4) != 0)
+		return (1);
+	return (0);
+}
+
+int	check_file(char *arg, bool cub)
+{
 	int			fd;
 	struct stat	path_stat;
 
-	if (stat(argv[1], &path_stat) != 0)
+	if (stat(arg, &path_stat) != 0)
 		return (print_err_msg(FILE_NOT_EXIST));
 	if (S_ISREG(path_stat.st_mode) == 0)
 		return (print_err_msg(FILE_NOT_REGULAR));
-	filename = argv[1];
-	if (wrong_extension(filename))
+	if (cub && wrong_cub(arg))
 		return (print_err_msg(WRONG_FILE_EXT));
-	fd = open(filename, O_RDONLY);
+	if (!cub && wrong_png(arg))
+		return (print_err_msg(WRONG_TEX_EXT));
+	fd = open(arg, O_RDONLY);
 	if (fd < 0)
 		return (print_err_msg(OPEN_FILE_ERR));
 	if (path_stat.st_size == 0)

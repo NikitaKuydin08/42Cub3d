@@ -12,18 +12,6 @@
 
 #include "../includes/cub3d.h"
 
-void	ft_error(t_data *data, int exit_code)
-{
-	if (!data)
-		exit(exit_code);
-	if (data->image && data->mlx)
-		mlx_delete_image(data->mlx, data->image);
-	if (data->mlx)
-		mlx_close_window(data->mlx);
-	// free_data(data); TODO
-	exit(exit_code);
-}
-
 void	init_data(t_data *data)
 {
 	data->win_height = 800;
