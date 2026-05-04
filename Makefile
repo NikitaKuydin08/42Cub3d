@@ -14,6 +14,7 @@ SRC = main.c \
 	init.c \
 	parsing/permission.c \
 	parsing/validate.c \
+	parsing/map_copy.c \
 	utils/error.c
 
 SRCS = ${addprefix $(SRCS_DIR), $(SRC)}

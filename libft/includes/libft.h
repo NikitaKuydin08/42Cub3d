@@ -68,6 +68,7 @@ int			ft_printint(int nb);
 int			ft_printptr(unsigned long long ptr);
 
 // gnl
+char		*get_next_line(int fd);
 char		*ft_get_line(char *storage);
 char		*ft_read_file(int fd, char *buff);
 void		ft_update_storage(char **storage);

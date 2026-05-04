@@ -40,8 +40,10 @@ int	parsing(t_data *data, char **argv)
 	(void)data;
     if (check_file(argv[1], true))
         ft_error(data, 1);
-    
-
+    if (map_copy_into_file(argv[1], data))
+		ft_error(data, 1);
+	if (extract_data(data))
+		free_data(data);
 	return (0);
 }
 

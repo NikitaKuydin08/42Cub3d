@@ -17,4 +17,15 @@
     - if the numbers are valid
 */
 
-int textures_path()
+// int floor_ceiling(t_data *data)
+// {
+//     int i;
+
+//     i = 0;
+//     while (i < 3)
+//     {
+
+//     }
+// }
+
+// int textures_path()
