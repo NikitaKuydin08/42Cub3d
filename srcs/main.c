@@ -42,7 +42,7 @@ int	parsing(t_data *data, char **argv)
         ft_error(data, 1);
     if (map_copy_into_file(argv[1], data))
 		ft_error(data, 1);
-	if (extract_data(data))
+	if (extract_data_from_file(data, data->file))
 		free_data(data);
 	return (0);
 }

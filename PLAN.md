@@ -40,25 +40,65 @@ Either nest a `t_scene` inside `t_data`, or flatten — your call. Just commit t
 
 ## Pass 1: structural parse + store
 
-One function reads the file once (whole-buffer or `get_next_line` loop), tokenizes, and dispatches each non-blank line:
+Pass 1 is split into two sub-steps that already have files on disk:
 
-- **Header lines** (start with `NO`/`SO`/`WE`/`EA`/`F`/`C` followed by whitespace): store the rest of the line (trimmed) into the matching struct field. If the field is already set → duplicate identifier → error.
-- **Map lines** (any line that looks like map content — `0`/`1`/space/N/S/E/W only): once the first map line is seen, flip a "map started" flag. Append to `map_lines`.
-- **Blank lines**: allowed before map starts; **forbidden** once map has started (terminates the map; later content is illegal).
-- **Unknown identifier or any other line shape**: error.
-- **Header line appearing after map started**: error (no interleaving).
+### 1a. `map_copy_into_file` — raw file copy ✅ done
 
-End of Pass 1 invariants:
-- All six header fields are non-NULL (else: missing element).
-- `map_lines` has at least one entry (else: missing map).
-- The order of headers in the file is **not** restricted — subject allows any order, only requires all six precede the map.
+[srcs/parsing/map_copy.c](srcs/parsing/map_copy.c) reads the whole `.cub` into `data->file` (a `char **` of every line, NULL-terminated) plus `data->line_count` and `data->path`. No interpretation — just an in-memory mirror of the file so subsequent steps don't re-open the FD.
 
-Gotchas to handle here:
-- **CRLF endings** — strip trailing `\r` defensively.
+### 1b. `extract_data` — structural parse + store (today's task)
+
+[srcs/parsing/extract_data.c](srcs/parsing/extract_data.c) walks `data->file[]` once and dispatches each non-blank line. **No value validation at this step** — just identify, store, and enforce structural rules.
+
+For each line:
+
+- **Header line** — first token is `NO`/`SO`/`WE`/`EA`/`F`/`C` followed by whitespace:
+  - Take the remainder of the line (trimmed) and assign it to the matching field on `data->texrgbinfo`:
+    - `NO` → `texrgbinfo.north`
+    - `SO` → `texrgbinfo.south`
+    - `WE` → `texrgbinfo.west`
+    - `EA` → `texrgbinfo.east`
+    - `F`  → `texrgbinfo.floor` (raw string for now; parse to ints in Pass 2)
+    - `C`  → `texrgbinfo.ceiling` (same)
+  - **If that field is already non-NULL → duplicate identifier → error.** This is the only "validation" Pass 1b does on header values.
+  - Do **not** check that the path ends in `.png`, that the file exists, that RGB is 3 ints, or anything else about the value itself. That's Pass 2's job.
+
+- **Map line** — line consists only of `0`/`1`/space/`N`/`S`/`E`/`W`:
+  - Flip a `map_started` flag and append the line to a real 2D map buffer `data->map[][]` (a separate `char **` from `data->file`, owned by Pass 1b — `data->file` stays as the raw source-of-truth copy).
+  - Track `data->map_height`.
+
+- **Blank line**:
+  - Allowed *before* the map starts (acts as separator between header and map, or between header lines).
+  - **Forbidden once the map has started** — terminates the map; any further content is structurally illegal.
+
+- **Anything else** (unknown identifier, garbage line, header line appearing after `map_started`): error.
+
+### Pass 1b structural invariants — enforced here, not later
+
+- **Each of the six identifiers appears at most once** (duplicate detection during store; see above).
+- **Map lives at the end of the file.** Once `map_started` flips true, no header line and no blank line is allowed after it. This rejects:
+  - Map at the start (followed by headers).
+  - Map in the middle (headers after map lines).
+  - Maps split by a blank line in the middle.
+- **All six header fields end up non-NULL** (else: missing element — checked once at the end of Pass 1b).
+- **`data->map` has at least one row** (else: missing map).
+
+The header *order* among NO/SO/WE/EA/F/C is **not** restricted — subject allows any order, only requires all six precede the map.
+
+### Storage shape after Pass 1b
+
+- `data->file[]` — raw line copy (already populated by 1a).
+- `data->texrgbinfo.north / .south / .west / .east` — raw path strings (no `.png` check yet).
+- `data->texrgbinfo.floor / .ceiling` — raw RGB strings (no parse-to-int yet).
+- `data->map[][]` — clean 2D char array of just the map rows (no header/blank lines).
+- `data->map_height` — row count.
+
+### Gotchas
+
+- **CRLF endings** — strip trailing `\r` defensively before tokenizing.
 - **Trailing whitespace on header lines** — trim before storing.
 - **Leading BOM** (`\xEF\xBB\xBF`) — rare; strip or reject.
-
-Cleanup: every error exit path must `free()` whatever was stored so far. Partial parses are the leakiest area.
+- **Partial-store leaks** — every error exit must free whatever has been stored so far on `data` (texture path strings, partial `data->map` rows). Pass 1b is the leakiest area.
 
 ---
 
@@ -142,9 +182,11 @@ Validation answers *"is this map structurally OK?"* — init answers *"set up ru
 
 ```
 correct_permission     <- O(1) syscalls, fastest
-parse_and_store        <- Pass 1: file → struct (single read)
-textures_path_valid    <- Pass 2: struct → check
-floor_ceil_rgb_valid   <- Pass 2: struct → check
+map_copy_into_file     <- Pass 1a: file → data->file[] raw copy (done)
+extract_data           <- Pass 1b: classify lines, store header values,
+                          build data->map[][], enforce map-at-end + uniqueness
+textures_path_valid    <- Pass 2: validate stored texture paths
+floor_ceil_rgb_valid   <- Pass 2: parse + range-check stored RGB strings
 map_valid              <- Pass 2: char set + player count + flood fill
 init_player            <- consume player triple, prep runtime state
 ```

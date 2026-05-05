@@ -33,6 +33,10 @@
 # define OPEN_FILE_ERR "Couldn't open the file, wrong permissions"
 # define FILE_IS_EMPTY "File is empty"
 # define ERR_MALLOC "Memory allocation error"
+# define MAP_NOT_LAST "Some content after map in the file"
+# define MISSING_MAP "Map doesn't exist in the file"
+# define MISSING_TEXTURE "At least one texture or rgb colours is missing"
+# define UNKNOWN_TEX "Unknown texture value"
 
 typedef	struct s_texrgbinfo
 {
@@ -59,6 +63,11 @@ typedef struct	s_data
 	char	*path;
 	int		fd;
 	int		line_count;
+
+	char	**map;
+	int		map_idx;
+	int		map_line;
+	bool	map_started;
 
 	t_texrgbinfo	texrgbinfo;
 }	t_data;

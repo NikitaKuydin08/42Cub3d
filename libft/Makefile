@@ -19,7 +19,8 @@ SRCS_DIR = srcs/
 OBJS_DIR = objects/
 
 IS_DIR = ft_is/
-FTIS = ft_isalnum ft_isalpha ft_isascii ft_isdigit ft_isprint
+FTIS = ft_isalnum ft_isalpha ft_isascii ft_isdigit ft_isprint \
+		ft_isspace
 
 LST_DIR = ft_lst/
 FTLST = ft_lstadd_back ft_lstadd_front ft_lstclear ft_lstdelone \
