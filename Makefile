@@ -13,8 +13,8 @@ LIBS = ${MLX_DIR}/build/libmlx42.a ${LIBFT_DIR}/libft.a -pthread -lm -lglfw
 SRC = main.c \
 	init.c \
 	parsing/permission.c \
-	parsing/validate.c \
 	parsing/map_copy.c \
+	parsing/extract_data.c \
 	utils/error.c
 
 SRCS = ${addprefix $(SRCS_DIR), $(SRC)}

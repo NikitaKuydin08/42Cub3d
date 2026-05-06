@@ -12,6 +12,23 @@
 
 #include "../includes/cub3d.h"
 
+void	free_tab(char **tab)
+{
+	int	i;
+
+	i = 0;
+	while (tab[i])
+	{
+		free(tab[i]);
+		i++;
+	}
+	if (tab)
+	{
+		free(tab);
+		tab = NULL;
+	}
+}
+
 int print_err_msg(char *msg)
 {
 	ft_putstr_fd("Error", 2);
@@ -27,6 +44,28 @@ void	ft_error(t_data *data, int exit_code)
 		mlx_delete_image(data->mlx, data->image);
 	if (data->mlx)
 		mlx_close_window(data->mlx);
-	// free_data(data); TODO
+	free_data(data);
 	exit(exit_code);
+}
+
+void	free_map(t_data *data)
+{
+	if (data->map)
+		free_tab(data->map);
+	if (data->file)
+		free_tab(data->file);
+	if (data->fd > 0)
+		close(data->fd);
+}
+
+void	free_texinfo(t_texrgbinfo texinfo)
+{
+	
+}
+
+int	free_data(t_data *data)
+{
+	free_map(data);
+	free_texinfo(data->texrgbinfo);
+	return (1);
 }

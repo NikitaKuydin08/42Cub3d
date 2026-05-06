@@ -12,6 +12,15 @@
 
 #include "../includes/cub3d.h"
 
+/*
+	Memory needs to be allocated for the map, before storing anything
+	in data->map[][]
+
+
+*/
+
+static int	finalize(t_data *data);
+
 int is_blank_line(char *line)
 {
 	int i;
@@ -30,9 +39,9 @@ int rest_is_blank(char **file, int idx)
 {
 	int i;
 
-	i = 0;
 	while (file[idx] != NULL)
 	{
+		i = 0;
 		while (file[idx][i])
 		{
 			if (!ft_isspace(file[idx][i]))
@@ -53,8 +62,8 @@ int	is_rgb_or_tex(char *line)
 		i++;
 	if (ft_isprint(line[i]) && !ft_isdigit(line[i]))
 	{
-		if (ft_isprint(line[i + 1] && !ft_isdigit(line[i + 1])
-			&& line[i + 2] <= 32))
+		if (ft_isprint(line[i + 1]) && !ft_isdigit(line[i + 1])
+			&& line[i + 2] <= 32)
 			return (1);
 		if ((line[i] == 'F' || line[i] == 'C')
 			&& line[i + 1] <= 32)
@@ -65,7 +74,31 @@ int	is_rgb_or_tex(char *line)
 
 static char	*get_texture_value(char *line, int idx)
 {
-	
+	int		i;
+	int		len;
+	char	*res;
+
+	len = 0;
+	i = 0;
+	while (line[idx] && line[idx] <= 32)
+		idx++;
+	len = idx;
+	while(line[len] && line[len] > 32)
+		len++;
+	res = ft_calloc(len - idx + 1, sizeof(char));
+	if (!res)
+		return (NULL);
+	while (line[idx] && line[idx] > 32)
+		res[i++] = line[idx++];
+	res[i] = '\0';
+	while(line[idx] && line[idx] <= 32)
+		idx++;
+	if (line[idx])
+	{
+		free(res);
+		res = NULL;
+	}
+	return (res);
 }
 
 static int	store_texture(t_data *data, char *line)
@@ -106,27 +139,16 @@ static int	store_data(t_data *data, char *line)
 	return (0);
 }
 
-static int	finalize(t_data *data)
+int extract_data_from_file(t_data *data)
 {
-	t_texrgbinfo	*info;
-
-	info = &data->texrgbinfo;
-	data->map[data->map_idx] = NULL;
-	if (!info->north || !info->south || !info->west || !info->east
-		|| !info->ceiling || !info->floor)
-		return (print_err_msg(MISSING_TEXTURE));
-	if (data->map_idx == 0)
-		return (print_err_msg(MISSING_MAP));
-	return (0);
-}
-
-int extract_data_from_file(t_data *data, char **file)
-{
-	int             row;
+	int	row;
 
 	row = 0;
 	data->map_idx = 0;
 	data->map_started = false;
+	data->map = ft_calloc(data->line_count + 1, sizeof(char *));
+	if (!data->map)
+		return (print_err_msg(ERR_MALLOC));
 	while (row < data->line_count)
 	{
 		if (is_blank_line(data->file[row]))
@@ -143,4 +165,18 @@ int extract_data_from_file(t_data *data, char **file)
 		row++;
 	}
 	return (finalize(data));
+}
+
+static int	finalize(t_data *data)
+{
+	t_texrgbinfo	*info;
+
+	info = &data->texrgbinfo;
+	data->map[data->map_idx] = NULL;
+	if (!info->north || !info->south || !info->west || !info->east
+		|| !info->ceiling || !info->floor)
+		return (print_err_msg(MISSING_TEXTURE));
+	if (data->map_idx == 0)
+		return (print_err_msg(MISSING_MAP));
+	return (0);
 }

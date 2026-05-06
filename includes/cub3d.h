@@ -44,13 +44,21 @@ typedef	struct s_texrgbinfo
 	char	*south;
 	char	*west;
 	char	*east;
-	int		*floor;
-	int		*ceiling;
+	char	*floor;
+	char	*ceiling;
 	int		hex_floor;
 	int		hex_ceiling;
 
 
 }	t_texrgbinfo;
+
+typedef struct	s_mapinfo
+{
+	int	row_count;
+	int	column_count;
+
+}	t_mapinfo;
+
 
 typedef struct	s_data
 {
@@ -69,6 +77,7 @@ typedef struct	s_data
 	int		map_line;
 	bool	map_started;
 
+	t_mapinfo		mapinfo;
 	t_texrgbinfo	texrgbinfo;
 }	t_data;
 
@@ -76,6 +85,7 @@ void	init_data(t_data *data);
 void	init_mlx(t_data *cub3d);
 
 void	ft_error(t_data *data, int exit_code);
+int		free_data(t_data *data);
 
 // VALIDATION //
 int	check_file(char *arg, bool cub);
@@ -86,5 +96,5 @@ int	map_copy_into_file(char *arg, t_data *data);
 // UTILS //
 int print_err_msg(char *msg);
 
-
+int extract_data_from_file(t_data *data);
 #endif
