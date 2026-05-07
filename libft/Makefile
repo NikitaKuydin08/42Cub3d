@@ -13,7 +13,7 @@
 NAME = libft.a
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -I ./includes
+CFLAGS = -Wall -Wextra -Werror -I ./includes -g
 
 SRCS_DIR = srcs/
 OBJS_DIR = objects/

@@ -2,7 +2,7 @@
 NAME = cub3D
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 MLX_DIR = ./MLX42
 LIBFT_DIR = ./libft
 OBJ_DIR = objects/

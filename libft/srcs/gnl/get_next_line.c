@@ -19,6 +19,12 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || fd >= 1024)
 		return (NULL);
+	if (!storage[fd])
+	{
+		storage[fd] = ft_calloc(1, 1);
+		if (!storage[fd])
+			return (NULL);
+	}
 	storage[fd] = ft_read_file(fd, storage[fd]);
 	if (!storage[fd])
 		return (NULL);

@@ -73,21 +73,19 @@ static int	copy_file(int row, int column, int i, t_data *data)
 	line = get_next_line(data->fd);
 	while (line != NULL)
 	{
+		i = 0;
+		column = 0;
 		data->file[row] = ft_calloc(ft_strlen(line) + 1, sizeof(char *));
 		if (!data->file[row])
 		{
 			free_copy(data->file);
+			free(line);
 			return (print_err_msg(ERR_MALLOC));
 		}
 		while (line[i])
-		{
-			data->file[row][column] = line[i];
-			column++;
-			row++;
-		}
+			data->file[row][column++] = line[i++];
 		data->file[row][column] = '\0';
-		column = 0;
-		row = 0;
+		row++;
 		free(line);
 		line = get_next_line(data->fd);
 	}

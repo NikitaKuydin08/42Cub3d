@@ -35,6 +35,25 @@ W for spawning a player looking west
 Valid map is it has 
 */
 
+// void	print_test_map(char **map)
+// {
+// 	int	i;
+// 	int	j;
+
+// 	i = 0;
+// 	while (map[i])
+// 	{
+// 		j = 0;
+// 		while (map[i][j])
+// 		{
+// 			printf("%c", map[i][j]);
+// 			j++;
+// 		}
+// 		i++;
+// 	}
+// 	printf("\n");
+// }
+
 int	parsing(t_data *data, char **argv)
 {
 	(void)data;
@@ -61,6 +80,10 @@ int	main(int argc, char **argv)
 	init_data(data);
 	init_mlx(data);
 	// the whole logic
+	// printf("The no texture: %s\n", data->texrgbinfo.north);
+	// printf("The so texture: %s\n", data->texrgbinfo.south);
+	// printf("The floor colour: %s\n", data->texrgbinfo.floor);
+	// print_test_map(data->map);
 	mlx_loop(data->mlx);
 	mlx_terminate(data->mlx);
 	free(data);

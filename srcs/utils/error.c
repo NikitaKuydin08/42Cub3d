@@ -58,14 +58,25 @@ void	free_map(t_data *data)
 		close(data->fd);
 }
 
-void	free_texinfo(t_texrgbinfo texinfo)
+void	free_texinfo(t_texrgbinfo *textures)
 {
-	
+	if (textures->north)
+		free(textures->north);
+	if (textures->south)
+		free(textures->south);
+	if (textures->west)
+		free(textures->west);
+	if (textures->east)
+		free(textures->east);
+	if (textures->ceiling)
+		free(textures->ceiling);
+	if (textures->floor)
+		free(textures->floor);	
 }
 
 int	free_data(t_data *data)
 {
 	free_map(data);
-	free_texinfo(data->texrgbinfo);
+	free_texinfo(&data->texrgbinfo);
 	return (1);
 }
