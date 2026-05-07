@@ -36,7 +36,10 @@
 # define MAP_NOT_LAST "Some content after map in the file"
 # define MISSING_MAP "Map doesn't exist in the file"
 # define MISSING_TEXTURE "At least one texture or rgb colours is missing"
-# define UNKNOWN_TEX "Unknown texture value"
+# define UNKNOWN_TEX "Unknown texture identifier value"
+# define DUPLICATE_TEX "Duplicate texture identifier"
+# define BAD_TEX_VALUE "Bad texture value (missing, malloc fail, or trailing garbage)"
+# define EXPECTED_WHITESPACE "Header identifier missing whitespace separator"
 
 typedef	struct s_texrgbinfo
 {
@@ -91,10 +94,20 @@ int		free_data(t_data *data);
 int	check_file(char *arg, bool cub);
 int	parsing(t_data *data, char **argv);
 
-int	map_copy_into_file(char *arg, t_data *data);
-
 // UTILS //
 int print_err_msg(char *msg);
 
+
+// EXTRACT_DATA //
 int extract_data_from_file(t_data *data);
+
+// HELPERS_TO_EXTRACT //
+int	finalize(t_data *data);
+int	is_rgb_or_tex(char *line);
+int rest_is_blank(char **file, int idx);
+int is_blank_line(char *line);
+
+// MAP_COPY //
+int	map_copy_into_file(char *arg, t_data *data);
+
 #endif

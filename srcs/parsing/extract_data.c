@@ -16,61 +16,20 @@
 	Memory needs to be allocated for the map, before storing anything
 	in data->map[][]
 
+	The storing needs to be refactored, because right now our
+	error messages are fucked up. 
+	Added recognise_texture that gives a store_texture an opportunity to
+	recognise the unknown identifier, duplicate identifier and storing of
+	the texture. 
 
+	The recognise texture fixed a lot of problems. Although there is another
+	thing right now. Sooo, NOassets/bluestone.xpm this one fails the
+	is_rgb_or_tex check, and falls into the map storing, after successfull storing
+	The check sees the the empty line, looks into the leftover, and finds out
+	there is some stuff after the map he thinks he stored. I don't know. The
+	is_rgb_or_tex function needs to make sure he checks everything before 
+	saying that the current line is the map's line.
 */
-
-static int	finalize(t_data *data);
-
-int is_blank_line(char *line)
-{
-	int i;
-
-	i = 0;
-	while (line[i])
-	{
-		if (!ft_isspace(line[i]))
-			return (0);
-		i++;
-	}
-	return (1);
-}
-
-int rest_is_blank(char **file, int idx)
-{
-	int i;
-
-	while (file[idx] != NULL)
-	{
-		i = 0;
-		while (file[idx][i])
-		{
-			if (!ft_isspace(file[idx][i]))
-				return (0);
-			i++;
-		}
-		idx++;
-	}
-	return (1);
-}
-
-int	is_rgb_or_tex(char *line)
-{
-	int	i;
-
-	i = 0;
-	while (line[i] && line[i] <= 32)
-		i++;
-	if (ft_isprint(line[i]) && !ft_isdigit(line[i]))
-	{
-		if (ft_isprint(line[i + 1]) && !ft_isdigit(line[i + 1])
-			&& line[i + 2] <= 32)
-			return (1);
-		if ((line[i] == 'F' || line[i] == 'C')
-			&& line[i + 1] <= 32)
-			return (1);
-	}
-	return (0);
-}
 
 static char	*get_texture_value(char *line, int idx)
 {
@@ -101,29 +60,54 @@ static char	*get_texture_value(char *line, int idx)
 	return (res);
 }
 
+static char	**recognise_texture(t_texrgbinfo *info, char *line, int *i)
+{
+	char	**slot;
+	int		idx;
+
+	idx = *i;
+	slot = NULL;
+	while (line[idx] && line[idx] <= 32)
+		idx++;
+	if (line[idx] == 'N' && line[idx + 1] == 'O')
+		slot = &info->north;
+	else if (line[idx] == 'S' && line[idx + 1] == 'O')
+		slot = &info->south;
+	else if (line[idx] == 'W' && line[idx + 1] == 'E')
+		slot = &info->west;
+	else if (line[idx] == 'E' && line[idx + 1] == 'A')
+		slot = &info->east;
+	else if (line[idx] == 'F')
+		slot = &info->floor;
+	else if (line[idx] == 'C')
+		slot = &info->ceiling;
+	if (slot && (line[idx] == 'F' || line[idx] == 'C'))
+		*i = idx + 1;
+	else if (slot)
+		*i = idx + 2;
+	return (slot);
+}
+
 static int	store_texture(t_data *data, char *line)
 {
 	t_texrgbinfo	*info;
+	char			**slot;
 	int	i;
 
 	i = 0;
 	info = &data->texrgbinfo;
 	while (line[i] && line[i] <= 32)
 		i++;
-	if (line[i] == 'N' && line[i + 1] == 'O' && !info->north)
-		info->north = get_texture_value(line, i + 2);
-	else if (line[i] == 'S' && line[i + 1] == 'O' && !info->south)
-		info->south = get_texture_value(line, i + 2);
-	else if (line[i] == 'W' && line[i + 1] == 'E' && !info->west)
-		info->west = get_texture_value(line, i + 2);
-	else if (line[i] == 'E' && line[i + 1] == 'A' && !info->east)
-		info->east = get_texture_value(line, i + 2);
-	else if (line[i] == 'F' && !info->floor)
-		info->floor = get_texture_value(line, i + 1);
-	else if (line[i] == 'C' && !info->ceiling)
-		info->ceiling = get_texture_value(line, i + 1);
-	else
+	slot = recognise_texture(info, line, &i);
+	if (!slot)
 		return (print_err_msg(UNKNOWN_TEX));
+	if (*slot)
+		return (print_err_msg(DUPLICATE_TEX));
+	if (line[i] && line[i] > 32)
+		return (print_err_msg(EXPECTED_WHITESPACE));
+	*slot = get_texture_value(line, i);
+	if (!*slot)
+		return (print_err_msg(BAD_TEX_VALUE));
 	return (0);
 }
 
@@ -165,18 +149,4 @@ int extract_data_from_file(t_data *data)
 		row++;
 	}
 	return (finalize(data));
-}
-
-static int	finalize(t_data *data)
-{
-	t_texrgbinfo	*info;
-
-	info = &data->texrgbinfo;
-	data->map[data->map_idx] = NULL;
-	if (!info->north || !info->south || !info->west || !info->east
-		|| !info->ceiling || !info->floor)
-		return (print_err_msg(MISSING_TEXTURE));
-	if (data->map_idx == 0)
-		return (print_err_msg(MISSING_MAP));
-	return (0);
 }

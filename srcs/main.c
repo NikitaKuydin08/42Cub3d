@@ -62,7 +62,8 @@ int	parsing(t_data *data, char **argv)
     if (map_copy_into_file(argv[1], data))
 		ft_error(data, 1);
 	if (extract_data_from_file(data))
-		free_data(data);
+		return (free_data(data));
+	//TODO all the checking shit
 	return (0);
 }
 
@@ -82,7 +83,7 @@ int	main(int argc, char **argv)
 	// the whole logic
 	// printf("The no texture: %s\n", data->texrgbinfo.north);
 	// printf("The so texture: %s\n", data->texrgbinfo.south);
-	// printf("The floor colour: %s\n", data->texrgbinfo.floor);
+	printf("The floor colour: %s\n", data->texrgbinfo.floor);
 	// print_test_map(data->map);
 	mlx_loop(data->mlx);
 	mlx_terminate(data->mlx);
