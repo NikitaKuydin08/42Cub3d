@@ -40,7 +40,10 @@
 # define DUPLICATE_TEX "Duplicate texture identifier"
 # define BAD_TEX_VALUE "Bad texture value (missing, malloc fail, or trailing garbage)"
 # define EXPECTED_WHITESPACE "Header identifier missing whitespace separator"
+# define MISSED_TEX "Some textures missing"
+# define IN_NUMBER_RGB "Invalid number of rgb tokens"
 
+// STRUCTURES //
 typedef	struct s_texrgbinfo
 {
 	char	*north;
@@ -87,27 +90,31 @@ typedef struct	s_data
 void	init_data(t_data *data);
 void	init_mlx(t_data *cub3d);
 
-void	ft_error(t_data *data, int exit_code);
-int		free_data(t_data *data);
+// CHECK_MAP //
+// int		check_map(t_data *data);
 
-// VALIDATION //
-int	check_file(char *arg, bool cub);
-int	parsing(t_data *data, char **argv);
-
-// UTILS //
-int print_err_msg(char *msg);
-
+// CHECK_TEXTURES //
+int 	check_textures(t_data *data, t_texrgbinfo *texinfo);
 
 // EXTRACT_DATA //
-int extract_data_from_file(t_data *data);
+int 	extract_data_from_file(t_data *data);
 
 // HELPERS_TO_EXTRACT //
-int	finalize(t_data *data);
-int	is_rgb_or_tex(char *line);
-int rest_is_blank(char **file, int idx);
-int is_blank_line(char *line);
+int		finalize(t_data *data);
+int		is_rgb_or_tex(char *line);
+int 	rest_is_blank(char **file, int idx);
+int 	is_blank_line(char *line);
 
 // MAP_COPY //
-int	map_copy_into_file(char *arg, t_data *data);
+int		map_copy_into_file(char *arg, t_data *data);
+
+// PERMISSION //
+int		check_file(char *arg, bool cub);
+
+// UTILS //
+int 	print_err_msg(char *msg);
+void	ft_error(t_data *data, int exit_code);
+int		free_data(t_data *data);
+void	free_tab(char **tab);
 
 #endif

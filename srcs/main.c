@@ -54,6 +54,8 @@ Valid map is it has
 // 	printf("\n");
 // }
 
+// EVERYWHERE the function returns 1 on failure
+
 int	parsing(t_data *data, char **argv)
 {
 	(void)data;
@@ -63,6 +65,10 @@ int	parsing(t_data *data, char **argv)
 		ft_error(data, 1);
 	if (extract_data_from_file(data))
 		return (free_data(data));
+	if (check_textures(data, &data->texrgbinfo))
+		return (free_data(data));
+	// if (check_map(data))
+	// 	return (free_data(data));
 	//TODO all the checking shit
 	return (0);
 }
