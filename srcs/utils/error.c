@@ -12,24 +12,7 @@
 
 #include "../includes/cub3d.h"
 
-void	free_tab(char **tab)
-{
-	int	i;
-
-	i = 0;
-	while (tab[i])
-	{
-		free(tab[i]);
-		i++;
-	}
-	if (tab)
-	{
-		free(tab);
-		tab = NULL;
-	}
-}
-
-int print_err_msg(char *msg)
+int	print_err_msg(char *msg)
 {
 	ft_putstr_fd("Error", 2);
 	ft_putstr_fd(msg, 2);
@@ -46,37 +29,4 @@ void	ft_error(t_data *data, int exit_code)
 		mlx_close_window(data->mlx);
 	free_data(data);
 	exit(exit_code);
-}
-
-void	free_map(t_data *data)
-{
-	if (data->map)
-		free_tab(data->map);
-	if (data->file)
-		free_tab(data->file);
-	if (data->fd > 0)
-		close(data->fd);
-}
-
-void	free_texinfo(t_texrgbinfo *textures)
-{
-	if (textures->north)
-		free(textures->north);
-	if (textures->south)
-		free(textures->south);
-	if (textures->west)
-		free(textures->west);
-	if (textures->east)
-		free(textures->east);
-	if (textures->ceiling)
-		free(textures->ceiling);
-	if (textures->floor)
-		free(textures->floor);	
-}
-
-int	free_data(t_data *data)
-{
-	free_map(data);
-	free_texinfo(&data->texrgbinfo);
-	return (1);
 }

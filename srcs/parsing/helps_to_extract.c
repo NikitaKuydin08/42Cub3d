@@ -12,9 +12,9 @@
 
 #include "../includes/cub3d.h"
 
-int is_blank_line(char *line)
+int	is_blank_line(char *line)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (line[i])
@@ -26,9 +26,9 @@ int is_blank_line(char *line)
 	return (1);
 }
 
-int rest_is_blank(char **file, int idx)
+int	rest_is_blank(char **file, int idx)
 {
-	int i;
+	int	i;
 
 	while (file[idx] != NULL)
 	{
@@ -70,4 +70,32 @@ int	finalize(t_data *data)
 	if (data->map_idx == 0)
 		return (print_err_msg(MISSING_MAP));
 	return (0);
+}
+
+char	**recognise_texture(t_texrgbinfo *info, char *line, int *i)
+{
+	char	**slot;
+	int		idx;
+
+	idx = *i;
+	slot = NULL;
+	while (line[idx] && line[idx] <= 32)
+		idx++;
+	if (line[idx] == 'N' && line[idx + 1] == 'O')
+		slot = &info->north;
+	else if (line[idx] == 'S' && line[idx + 1] == 'O')
+		slot = &info->south;
+	else if (line[idx] == 'W' && line[idx + 1] == 'E')
+		slot = &info->west;
+	else if (line[idx] == 'E' && line[idx + 1] == 'A')
+		slot = &info->east;
+	else if (line[idx] == 'F')
+		slot = &info->floor;
+	else if (line[idx] == 'C')
+		slot = &info->ceiling;
+	if (slot && (line[idx] == 'F' || line[idx] == 'C'))
+		*i = idx + 1;
+	else if (slot)
+		*i = idx + 2;
+	return (slot);
 }

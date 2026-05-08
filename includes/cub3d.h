@@ -38,13 +38,17 @@
 # define MISSING_TEXTURE "At least one texture or rgb colours is missing"
 # define UNKNOWN_TEX "Unknown texture identifier value"
 # define DUPLICATE_TEX "Duplicate texture identifier"
-# define BAD_TEX_VALUE "Bad texture value (missing, malloc fail, or trailing garbage)"
+# define BAD_TEX_VALUE "Bad texture value (missing, malloc fail, or \
+	trailing garbage)"
 # define EXPECTED_WHITESPACE "Header identifier missing whitespace separator"
-# define MISSED_TEX "Some textures missing"
-# define IN_NUMBER_RGB "Invalid number of rgb tokens"
+# define MISSED_TEX "At leaast one texture is missing"
+# define INVALID_COUNT_RGB "Invalid number of rgb values, it must be exactly 3"
+# define CONTAINS_OTHER_CHAR "At least one rgb colour contains non-digit \
+	char (including signs)"
+# define OUT_OF_RANGE "At least one of R,G,B colours is out of range [0, 255]"
 
 // STRUCTURES //
-typedef	struct s_texrgbinfo
+typedef struct s_texrgbinfo
 {
 	char	*north;
 	char	*south;
@@ -55,33 +59,31 @@ typedef	struct s_texrgbinfo
 	int		hex_floor;
 	int		hex_ceiling;
 
-
 }	t_texrgbinfo;
 
-typedef struct	s_mapinfo
+typedef struct s_mapinfo
 {
 	int	row_count;
 	int	column_count;
 
 }	t_mapinfo;
 
-
-typedef struct	s_data
+typedef struct s_data
 {
-	void	*mlx;
-	void	*image;
-	int		win_height;
-	int		win_width;
+	void			*mlx;
+	void			*image;
+	int				win_height;
+	int				win_width;
 
-	char	**file;
-	char	*path;
-	int		fd;
-	int		line_count;
+	char			**file;
+	char			*path;
+	int				fd;
+	int				line_count;
 
-	char	**map;
-	int		map_idx;
-	int		map_line;
-	bool	map_started;
+	char			**map;
+	int				map_idx;
+	int				map_line;
+	bool			map_started;
 
 	t_mapinfo		mapinfo;
 	t_texrgbinfo	texrgbinfo;
@@ -91,19 +93,19 @@ void	init_data(t_data *data);
 void	init_mlx(t_data *cub3d);
 
 // CHECK_MAP //
-// int		check_map(t_data *data);
+int		check_map(t_data *data);
 
 // CHECK_TEXTURES //
-int 	check_textures(t_data *data, t_texrgbinfo *texinfo);
-
+int		check_textures(t_texrgbinfo *texinfo);
 // EXTRACT_DATA //
-int 	extract_data_from_file(t_data *data);
+int		extract_data_from_file(t_data *data);
 
 // HELPERS_TO_EXTRACT //
 int		finalize(t_data *data);
 int		is_rgb_or_tex(char *line);
-int 	rest_is_blank(char **file, int idx);
-int 	is_blank_line(char *line);
+int		rest_is_blank(char **file, int idx);
+int		is_blank_line(char *line);
+char	**recognise_texture(t_texrgbinfo *info, char *line, int *i);
 
 // MAP_COPY //
 int		map_copy_into_file(char *arg, t_data *data);
@@ -112,7 +114,7 @@ int		map_copy_into_file(char *arg, t_data *data);
 int		check_file(char *arg, bool cub);
 
 // UTILS //
-int 	print_err_msg(char *msg);
+int		print_err_msg(char *msg);
 void	ft_error(t_data *data, int exit_code);
 int		free_data(t_data *data);
 void	free_tab(char **tab);

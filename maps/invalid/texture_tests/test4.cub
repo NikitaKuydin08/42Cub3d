@@ -1,8 +1,8 @@
-NO assets/bluestone.xpm
+NO textures/yellow/yellow0.png
 NO
-SO assets/eagle.xpm
-WE assets/greystone.xpm
-EA assets/redbrick.xpm
+SO textures/yellow/yellow1.png
+WE textures/yellow/yellow2.png
+EA textures/yellow/yellow3.png
 F 220,100,0
 C 225,30,0
 

@@ -26,10 +26,12 @@ void	init_mlx(t_data *cub3d)
 		ft_putstr_fd("cub3d: Error: mlx: Could not initialize mlx", 2);
 		ft_error(cub3d, 1);
 	}
-	cub3d->image = mlx_new_image(cub3d->mlx, cub3d->win_width, cub3d->win_height);
+	cub3d->image = mlx_new_image(cub3d->mlx, cub3d->win_width,
+			cub3d->win_height);
 	if (!cub3d->image)
 	{
-		ft_putstr_fd("cub3d: Error: mlx: Could not allocate a new image buffer", 2);
+		ft_putstr_fd("cub3d: Error: mlx: Could not allocate a new \
+			image buffer", 2);
 		ft_error(cub3d, 1);
 	}
 	if (mlx_image_to_window(cub3d->mlx, cub3d->image, 0, 0) < 0)
