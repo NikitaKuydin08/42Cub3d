@@ -46,6 +46,11 @@
 # define CONTAINS_OTHER_CHAR "At least one rgb colour contains non-digit \
 	char (including signs)"
 # define OUT_OF_RANGE "At least one of R,G,B colours is out of range [0, 255]"
+// MAPS_ERRORS //
+# define WALL_HOLE_WEST "Map is not surrounded by walls on the west, hole somewhere"
+# define WALL_HOLE_NORTH "Map is not surrounded by walls on the north, hole somewhere"
+# define WALL_HOLE_SOUTH "Map is not surrounded by walls on the south, hole somewhere"
+# define WALL_HOLE_EAST "Map is not surrounded by walls on the east, hole somewhere"
 
 // STRUCTURES //
 typedef struct s_texrgbinfo

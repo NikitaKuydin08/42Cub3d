@@ -17,7 +17,9 @@ SRC = main.c \
 	parsing/extract_data.c \
 	parsing/helps_to_extract.c \
 	parsing/check_textures.c \
-	utils/error.c
+	parsing/check_map.c \
+	utils/error.c \
+	utils/free_data.c
 
 SRCS = ${addprefix $(SRCS_DIR), $(SRC)}
 

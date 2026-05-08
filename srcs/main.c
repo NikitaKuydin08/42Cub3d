@@ -34,13 +34,33 @@ W for spawning a player looking west
 
 Valid map is it has 
 */
+
+// void	print_test_map(char **map)
+// {
+// 	int	i;
+// 	int	j;
+
+// 	i = 0;
+// 	while (map[i])
+// 	{
+// 		j = 0;
+// 		while (map[i][j])
+// 		{
+// 			printf("%c", map[i][j]);
+// 			j++;
+// 		}
+// 		i++;
+// 	}
+// 	printf("\n");
+// }
+
 // EVERYWHERE the function returns 1 on failure
 
 int	parsing(t_data *data, char **argv)
 {
 	if (check_file(argv[1], true))
 		ft_error(data, 1);
-	if (map_copy_into_file(argv[1], data))
+    if (map_copy_into_file(argv[1], data))
 		ft_error(data, 1);
 	if (extract_data_from_file(data))
 		return (free_data(data));
@@ -48,7 +68,6 @@ int	parsing(t_data *data, char **argv)
 		return (free_data(data));
 	if (check_map(data))
 		return (free_data(data));
-	//TODO all the checking shit
 	return (0);
 }
 
@@ -65,7 +84,7 @@ int	main(int argc, char **argv)
 		return (1);
 	init_data(data);
 	init_mlx(data);
-	// the whole logic
+	// print_test_map(data->map);
 	mlx_loop(data->mlx);
 	mlx_terminate(data->mlx);
 	free(data);

@@ -119,13 +119,21 @@ static int	store_texture(t_data *data, char *line)
 
 static int	store_data(t_data *data, char *line)
 {
+	int		i;
+
+	i = 0;
 	if (!data->map_started && is_rgb_or_tex(line))
 		return (store_texture(data, line));
 	data->map_started = true;
+	while (line[i] && line[i] <= 32)
+		i++;
+	if (line[i] != '1')
+		return (print_err_msg(WALL_HOLE_WEST));
 	data->map[data->map_idx] = ft_strdup(line);
 	if (!data->map[data->map_idx])
 		return (print_err_msg(ERR_MALLOC));
 	data->map_idx++;
+	data->mapinfo.row_count++;
 	return (0);
 }
 

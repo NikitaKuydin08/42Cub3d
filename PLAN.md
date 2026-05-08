@@ -2,230 +2,260 @@
 
 ## Strategy: two-pass parsing
 
-Validation runs in two distinct phases. **Pass 1** confirms the file is structurally shaped right and *stores* the raw values into the struct. **Pass 2** validates the meaning of those stored values. After Pass 1, no further file I/O for header content — everything is read back from the struct.
+Validation runs in two phases. **Pass 1** confirms the file is structurally shaped right and *stores* the raw values into the struct. **Pass 2** validates the meaning of those stored values. After Pass 1, no further file I/O for header content — everything is read back from the struct.
 
 ```
 Pass 1 (file → struct):  structural parse + store
 Pass 2 (struct → check): semantic validation
 ```
 
-This keeps each function single-purpose, decouples I/O from semantics, makes errors easier to localize, and means the raycaster/init step also reads from the struct rather than re-parsing.
+---
+
+## Status
+
+| Step | What | File | Status |
+|---|---|---|---|
+| 0 | File access (`.cub` ext, regular file, openable, non-empty) | [srcs/parsing/permission.c](srcs/parsing/permission.c) | ✅ done |
+| 1a | Read full file into `data->file[]` | [srcs/parsing/map_copy.c](srcs/parsing/map_copy.c) | ✅ done |
+| 1b | Classify lines, store header values, build `data->map[][]` | [srcs/parsing/extract_data.c](srcs/parsing/extract_data.c) + [helps_to_extract.c](srcs/parsing/helps_to_extract.c) | ✅ done |
+| 2a | Texture paths (.png, file exists) | [srcs/parsing/check_textures.c](srcs/parsing/check_textures.c) | ✅ done |
+| 2b | F/C RGB validation + hex packing | [srcs/parsing/check_textures.c](srcs/parsing/check_textures.c) | ✅ done |
+| 2c | Map: char set, player count, closure (flood fill) | [srcs/parsing/check_map.c](srcs/parsing/check_map.c) | ⏳ **next** |
+| 3 | `init_player` — direction/plane vectors, replace player char with `'0'` | (new) | ⏳ pending |
+| 4 | Free everything on every error path | [srcs/utils/free_data.c](srcs/utils/free_data.c) | ⏳ ongoing |
+
+Wired into the pipeline in [srcs/main.c:59-72](srcs/main.c#L59-L72) — `parsing()` calls Pass 0 → 1a → 1b → 2a/2b → 2c (stub) → return.
 
 ---
 
-## Pass 0: file access
+## Pass 2c: `check_map` — the plan
 
-`correct_permission(t_data *data, char **argv)` — already implemented in [srcs/parsing/permission.c](srcs/parsing/permission.c).
+This is what you're writing now. It only reads from `data->map[][]` (already populated by Pass 1b). No file I/O.
 
-- `argv[1]` not NULL.
-- Filename ends in `.cub` (exactly — `map.cub.bak` fails; `.cub` alone fails).
-- `stat()` succeeds and `S_ISREG` (reject directories — opening a dir succeeds on some systems and gives garbage).
-- `open(O_RDONLY)` succeeds.
-- File is not empty.
+### Stance on whitespace in the map
 
----
+The 42 subject says: *"the map must be parsed as it looks in the file. Spaces are a valid part of the map and are up to you to handle."*
 
-## Storage: extend `t_data`
+Your interpretation, agreed:
 
-Pass 1 needs somewhere to write to. Replace the empty `t_texrgbinfo` placeholder in [includes/cub3d.h:43-46](includes/cub3d.h#L43-L46) with concrete fields:
+- **Spaces** in the map are valid. They represent void / outside-the-map. The closure check decides whether a given space is acceptable (no walkable cell adjacent to it) or not (adjacent to a `0` cell → leak).
+- **Tabs** are treated as **equivalent to spaces** — both before, inside, and after map content. Authors often use tabs for indentation; they're visually whitespace, so accept them.
+- **Trailing `\r` / `\n`** on each row are stripped at storage time.
+- Any other character → reject.
 
-- Four texture path strings: `no_path`, `so_path`, `we_path`, `ea_path` (NULL until set; duplicates detected by "already non-NULL").
-- Two RGB raw strings (or two `int[3]` triples, decided in Pass 2): `f_rgb`, `c_rgb`.
-- Map line array: `char **map_lines`, `int map_height`.
-- Player triple `(x, y, orient)` — populated during Pass 2 map validation, consumed by `init_player`.
+After normalization, `data->map[i]` contains only `{ '0', '1', ' ', 'N', 'S', 'E', 'W' }`.
 
-Either nest a `t_scene` inside `t_data`, or flatten — your call. Just commit to the shape before writing parser code.
+### Step 0 — normalize rows (do this in `extract_data`'s `store_data`, not in `check_map`)
 
----
+Replace `data->map[data->map_idx] = ft_strdup(line);` with a helper:
 
-## Pass 1: structural parse + store
+```c
+static char  *normalize_row(char *line)
+{
+    int   len;
+    int   i;
+    char  *res;
 
-Pass 1 is split into two sub-steps that already have files on disk:
+    len = 0;
+    while (line[len])
+        len++;
+    while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r'))
+        len--;
+    res = ft_calloc(len + 1, sizeof(char));
+    if (!res)
+        return (NULL);
+    i = 0;
+    while (i < len)
+    {
+        if (line[i] == '\t')
+            res[i] = ' ';
+        else
+            res[i] = line[i];
+        i++;
+    }
+    return (res);
+}
+```
 
-### 1a. `map_copy_into_file` — raw file copy ✅ done
+Now `data->map[i]` is "clean" — no `\r`, no `\n`, no `\t`. This makes every subsequent check trivial.
 
-[srcs/parsing/map_copy.c](srcs/parsing/map_copy.c) reads the whole `.cub` into `data->file` (a `char **` of every line, NULL-terminated) plus `data->line_count` and `data->path`. No interpretation — just an in-memory mirror of the file so subsequent steps don't re-open the FD.
+### Step 1 — character set + player position + walkable count (single walk)
 
-### 1b. `extract_data` — structural parse + store (today's task)
+Three checks in one loop. For each cell `(r, c)` in `data->map`:
 
-[srcs/parsing/extract_data.c](srcs/parsing/extract_data.c) walks `data->file[]` once and dispatches each non-blank line. **No value validation at this step** — just identify, store, and enforce structural rules.
+- If char is in `{ '0', '1', ' ' }` → accept, increment walkable count if it's `'0'`.
+- If char is in `{ 'N', 'S', 'E', 'W' }` → record `(c, r, char)` as the player triple, increment player count, increment walkable count.
+- Else → error (`INVALID_MAP_CHAR`).
 
-For each line:
+After the loop:
 
-- **Header line** — first token is `NO`/`SO`/`WE`/`EA`/`F`/`C` followed by whitespace:
-  - Take the remainder of the line (trimmed) and assign it to the matching field on `data->texrgbinfo`:
-    - `NO` → `texrgbinfo.north`
-    - `SO` → `texrgbinfo.south`
-    - `WE` → `texrgbinfo.west`
-    - `EA` → `texrgbinfo.east`
-    - `F`  → `texrgbinfo.floor` (raw string for now; parse to ints in Pass 2)
-    - `C`  → `texrgbinfo.ceiling` (same)
-  - **If that field is already non-NULL → duplicate identifier → error.** This is the only "validation" Pass 1b does on header values.
-  - Do **not** check that the path ends in `.png`, that the file exists, that RGB is 3 ints, or anything else about the value itself. That's Pass 2's job.
+- `player_count == 0` → error (`MISSING_PLAYER`).
+- `player_count > 1` → error (`MULTIPLE_PLAYERS`).
+- `walkable_count == 0` → error (`MAP_NO_WALKABLE`). Catches `bad/map_too_small.cub` (3×3 of `1`s).
 
-- **Map line** — line consists only of `0`/`1`/space/`N`/`S`/`E`/`W`:
-  - Flip a `map_started` flag and append the line to a real 2D map buffer `data->map[][]` (a separate `char **` from `data->file`, owned by Pass 1b — `data->file` stays as the raw source-of-truth copy).
-  - Track `data->map_height`.
+Store the player triple on `t_data` (add `int player_x; int player_y; char player_dir;` to the struct, or nest in a `t_player`). `init_player` will consume it later.
 
-- **Blank line**:
-  - Allowed *before* the map starts (acts as separator between header and map, or between header lines).
-  - **Forbidden once the map has started** — terminates the map; any further content is structurally illegal.
+### Step 2 — flood fill for closure
 
-- **Anything else** (unknown identifier, garbage line, header line appearing after `map_started`): error.
+This is the killer check. Recursive DFS from the player's position over `'0'` and player cells, marking visited cells. The map is **closed** iff during the flood:
 
-### Pass 1b structural invariants — enforced here, not later
-
-- **Each of the six identifiers appears at most once** (duplicate detection during store; see above).
-- **Map lives at the end of the file.** Once `map_started` flips true, no header line and no blank line is allowed after it. This rejects:
-  - Map at the start (followed by headers).
-  - Map in the middle (headers after map lines).
-  - Maps split by a blank line in the middle.
-- **All six header fields end up non-NULL** (else: missing element — checked once at the end of Pass 1b).
-- **`data->map` has at least one row** (else: missing map).
-
-The header *order* among NO/SO/WE/EA/F/C is **not** restricted — subject allows any order, only requires all six precede the map.
-
-### Storage shape after Pass 1b
-
-- `data->file[]` — raw line copy (already populated by 1a).
-- `data->texrgbinfo.north / .south / .west / .east` — raw path strings (no `.png` check yet).
-- `data->texrgbinfo.floor / .ceiling` — raw RGB strings (no parse-to-int yet).
-- `data->map[][]` — clean 2D char array of just the map rows (no header/blank lines).
-- `data->map_height` — row count.
-
-### Gotchas
-
-- **CRLF endings** — strip trailing `\r` defensively before tokenizing.
-- **Trailing whitespace on header lines** — trim before storing.
-- **Leading BOM** (`\xEF\xBB\xBF`) — rare; strip or reject.
-- **Partial-store leaks** — every error exit must free whatever has been stored so far on `data` (texture path strings, partial `data->map` rows). Pass 1b is the leakiest area.
-
----
-
-## Pass 2: semantic validation (struct → check)
-
-Each validator reads from `t_data` only. No FD, no cursor, no re-parsing.
-
-### 2a. `textures_path_valid(t_data *data)`
-
-For each of the four stored paths:
-
-- Path is non-empty.
-- Path ends in `.png` (MLX42 only loads PNG) — already have `wrong_png` helper in [srcs/parsing/permission.c:33-43](srcs/parsing/permission.c#L33-L43).
-- File at that path opens for reading (reuse `check_file(path, false)`).
-- Reject trailing garbage on the original line — actually catch this in Pass 1 when tokenizing (a header line should have exactly identifier + path, no third token).
-
-### 2b. `floor_ceil_rgb_valid(t_data *data)`
-
-For each of the two stored RGB strings:
-
-- Exactly three comma-separated tokens (count commas; reject 2 or 4).
-- Each token is purely digits (no `+`, no `.`, no letters).
-- Each parses to an integer in **[0, 255]**.
-- **Whitespace around commas**: subject doesn't explicitly allow it. Pick a stance — strict (reject `220, 100, 0`) is safer for evaluators, but most accept it. Document the choice in code.
-- Store parsed `int[3]` back into the struct (or a separate field) so the renderer reads ints, not strings.
-
-### 2c. `map_valid(t_data *data)`
-
-Operates on `map_lines[]` only.
-
-**Character set.** Only `0`, `1`, ` `, `N`, `S`, `E`, `W` allowed. **Tabs rejected** — confirmed by `map_tests/test4.cub` and `map_tests/test15.cub`. Anything else → error.
-
-**Player count.** Exactly **one** of `{N, S, E, W}` across all cells. Zero → error. Two or more → error (note `1NW1` row from `test19.cub` — N at col 1, W at col 2, two players).
-
-**Walkable region exists.** Total `0` + player cells ≥ 1. A 3×3 of all `1`s is invalid (`bad/map_too_small.cub`).
-
-**Closure via flood fill** — the killer check. BFS/DFS from the player position over `0` cells. Map is closed iff:
-1. No cell index ever goes out of array bounds (negative row/col, row ≥ height, or col ≥ length of *that specific row*).
-2. No `0` cell is 4-adjacent to a space character.
+1. No cell index ever goes out of bounds (negative row/col, row ≥ height, or col ≥ length of *that specific row*).
+2. No reached cell is 4-adjacent (up/down/left/right) to a `' '` (space).
 
 If either fails → not closed → error.
 
-**Jagged rows reminder.** Rows may legally have different lengths. When checking neighbours, treat `col ≥ len(this_row)` as out-of-bounds, not as space:
+The standard pattern: copy `data->map` (or use a parallel "visited" 2D array), recurse from `(player_x, player_y)`. On entry to each cell:
+
+- If out of bounds → set "leak" flag, return.
+- If cell is `' '` → set "leak" flag, return.
+- If cell is `'1'` → return (wall, stop).
+- If already visited → return.
+- Mark visited. Recurse into four neighbors.
+
+Pseudocode:
+
 ```
-11111
-10001
-10001
-1001    <- 4 wide; cell (3,1)'s right neighbour at col 4 doesn't exist → OOB → leak
-11111
+flood(map, r, c, height, leak):
+    if r < 0 or r >= height:
+        *leak = true; return
+    if c < 0 or c >= row_len(map[r]):
+        *leak = true; return
+    if map[r][c] == ' ':
+        *leak = true; return
+    if map[r][c] == '1' or map[r][c] == 'V':   // V = visited marker
+        return
+    map[r][c] = 'V'
+    flood(map, r - 1, c, height, leak)
+    flood(map, r + 1, c, height, leak)
+    flood(map, r, c - 1, height, leak)
+    flood(map, r, c + 1, height, leak)
 ```
 
-This single flood fill catches:
-- All `bad/wall_hole_*.cub` (boundary cells with no wall → OOB neighbour).
-- `bad/wall_none.cub` (all 0s).
-- `bad/player_on_edge.cub` (BFS step looks past row 0).
-- `bad/forbidden.cub` (0s adjacent to space).
-- `map_tests/test1.cub`, `test5.cub`–`test9.cub` — interior leaks and short-row gaps.
+The map is closed iff `leak` is still `false` after the recursion returns. The `'V'` marker stops re-recursion and lets you scan the map afterward to confirm every reachable `'0'` got visited (sanity, optional).
 
-**Note: `map_valid` only validates.** It records the player triple `(x, y, orient)` into the struct but does **not** rewrite the map or set up direction vectors. That's `init_player`'s job (next section).
+Either:
+- **Mutate `data->map` directly.** Cheap. Player char is overwritten with `'V'` then later replaced by `init_player` with `'0'`. Save the player position before flood so you don't lose it.
+- **Allocate a separate `char **visited`** to keep `data->map` pristine. Cleaner but extra alloc + free. Use this if you want `init_player` to read the original char.
+
+Either works. Mutating is one fewer allocation — go with that unless you need the original map untouched.
+
+### Jagged-row reminder
+
+Rows may legally have different lengths. **The flood fill must use the actual length of *each row*** when checking out-of-bounds, not a global "max width":
+
+```c
+int  row_len(char **map, int r)
+{
+    int  i;
+
+    i = 0;
+    while (map[r][i])
+        i++;
+    return (i);
+}
+```
+
+Then `if (c >= row_len(map, r))` → out of bounds. Treating it as "wall" or "space" instead is the classic bug — `bad/wall_hole_*.cub` files exploit this.
+
+### What `check_map` catches, by failure mode
+
+| Test file | Failure mode | Caught by |
+|---|---|---|
+| `bad/map_missing.cub`, `bad/empty.cub`, `map_tests/test17`, `test18`, `test20` | no map at all | Pass 1b's `MISSING_MAP` (already done) |
+| `bad/map_first.cub`, `map_middle.cub`, `file_letter_end.cub`, `map_tests/test8`, `test12`, `test13`, `test14` | header/blank after map starts | Pass 1b's `MAP_NOT_LAST` (already done) |
+| `map_tests/test10` (`Q` char) | invalid character | char-set check |
+| `bad/player_none.cub`, `map_tests/test2` | no player | player count == 0 |
+| `bad/player_multiple.cub`, `map_tests/test11`, `test19` (`1NW1`) | multiple players | player count > 1 |
+| `bad/map_too_small.cub` | no walkable | walkable count == 0 |
+| `bad/wall_hole_north/south/east/west.cub` | open boundary | flood fill OOB neighbor |
+| `bad/wall_none.cub` | all 0s | flood OOB on every edge |
+| `bad/player_on_edge.cub` | player at row 0 | flood looks past row -1 → OOB |
+| `bad/forbidden.cub`, `map_tests/test1`, `test5`–`test9` | 0 adjacent to space | flood reaches space cell |
+
+That's the full Pass 2c coverage.
 
 ---
 
-## After validation: `init_player`
+## Step 3 — `init_player`
 
-Once Pass 2 returns success:
+Once `check_map` returns success:
 
-1. Read the recorded player triple from `t_data`.
-2. Set `data->player.x`, `data->player.y` (typically + 0.5 for cell-center spawn).
-3. Set initial direction vector + camera plane based on N/S/E/W:
-   - `N` → dir `(0, -1)`, plane `(0.66, 0)`
-   - `S` → dir `(0, 1)`, plane `(-0.66, 0)`
-   - `E` → dir `(1, 0)`, plane `(0, 0.66)`
-   - `W` → dir `(-1, 0)`, plane `(0, -0.66)`
-4. Replace the player char in `map_lines` with `'0'` so the raycaster only sees `0`/`1`/space.
+1. Read the recorded player triple `(player_x, player_y, player_dir)` from `t_data`.
+2. Set `data->player.x = player_x + 0.5; data->player.y = player_y + 0.5;` (cell-center spawn).
+3. Set initial direction vector + camera plane based on `player_dir`:
+   - `'N'` → dir `(0, -1)`, plane `(0.66, 0)`
+   - `'S'` → dir `(0,  1)`, plane `(-0.66, 0)`
+   - `'E'` → dir `(1,  0)`, plane `(0,  0.66)`
+   - `'W'` → dir `(-1, 0)`, plane `(0, -0.66)`
+4. Replace the player char in `data->map[player_y][player_x]` with `'0'` so the raycaster only sees `0`/`1`/space.
 
-Validation answers *"is this map structurally OK?"* — init answers *"set up runtime state from it."*
+This is also where you add the player struct to `t_data`:
+
+```c
+typedef struct s_player {
+    double  x;
+    double  y;
+    double  dir_x;
+    double  dir_y;
+    double  plane_x;
+    double  plane_y;
+}   t_player;
+```
+
+`check_map` finishes with the player at integer coordinates; `init_player` upgrades to doubles for ray math.
 
 ---
 
-## Recommended call order
+## Recommended call order (no change from before)
 
 ```
-correct_permission     <- O(1) syscalls, fastest
-map_copy_into_file     <- Pass 1a: file → data->file[] raw copy (done)
-extract_data           <- Pass 1b: classify lines, store header values,
-                          build data->map[][], enforce map-at-end + uniqueness
-textures_path_valid    <- Pass 2: validate stored texture paths
-floor_ceil_rgb_valid   <- Pass 2: parse + range-check stored RGB strings
-map_valid              <- Pass 2: char set + player count + flood fill
-init_player            <- consume player triple, prep runtime state
+correct_permission     ← O(1) syscalls, fastest
+map_copy_into_file     ← Pass 1a: file → data->file[] raw copy ✅
+extract_data_from_file ← Pass 1b: classify, store, build data->map[][] ✅
+check_textures         ← Pass 2a/2b: texture paths + RGB ✅
+check_map              ← Pass 2c: char set + player + flood fill ⏳
+init_player            ← consume player triple, prep runtime state ⏳
 ```
 
 ---
 
-## Files to modify
+## Files to modify for `check_map`
 
-- [includes/cub3d.h](includes/cub3d.h) — flesh out `t_texrgbinfo` (or rename to `t_scene`) with texture paths, RGB triples, map lines, player triple. Add prototypes for new parser functions.
-- [srcs/parsing/validate.c](srcs/parsing/validate.c) — currently stubbed. Implement Pass 2 validators here.
-- [srcs/parsing/textures.c](srcs/parsing/textures.c) — currently a one-line stub. Implement texture path checks here.
-- New `srcs/parsing/parse_store.c` (or similar) — Pass 1 driver.
-- New `srcs/parsing/map.c` — flood fill + player count + char set checks (separate to keep `validate.c` under Norm function/file limits).
-- [srcs/main.c:38-46](srcs/main.c#L38-L46) — wire `parsing()` to call the new pipeline; currently only calls `check_file`.
-- [srcs/utils/error.c](srcs/utils/error.c) — extend `ft_error` to free the new struct fields once they're added.
+- [includes/cub3d.h](includes/cub3d.h) — add `int player_x;`, `int player_y;`, `char player_dir;` to `t_data` (or nest in a `t_player`). Add error macros: `INVALID_MAP_CHAR`, `MISSING_PLAYER`, `MULTIPLE_PLAYERS`, `MAP_NO_WALKABLE`, `MAP_NOT_CLOSED`.
+- [srcs/parsing/check_map.c](srcs/parsing/check_map.c) — implement char-set + player + walkable scan, plus flood fill driver. Probably split into 2–3 helpers across one or two files (Norm 5-funcs-per-file limit).
+- [srcs/parsing/extract_data.c](srcs/parsing/extract_data.c) — apply the `normalize_row` helper inside `store_data` so `\t` becomes `' '` and `\r\n` is stripped before storing.
+- [srcs/utils/free_data.c](srcs/utils/free_data.c) — make sure `data->map[]` is freed on every error path.
 
 ---
 
 ## Verification
 
-Test suite at `42Cub3d/maps/invalid/`:
+Test suite at `maps/invalid/`:
 
-- `bad/` — 28 single-failure-mode files.
-- `map_tests/` — `test1.cub` through `test20.cub`, focused on map content.
-- `texture_tests/` — texture path failures.
-- `color_tests/` — RGB failures.
+- `bad/` — single-failure-mode files.
+- `map_tests/test1.cub` … `test20.cub` — map-content failures.
+- `texture_tests/` — texture path failures (already passing).
+- `color_tests/` — RGB failures (already passing).
 
 ```sh
-# All invalid maps must exit non-zero with "Error\n..."
-for f in maps/invalid/bad/*.cub maps/invalid/map_tests/*.cub; do
-    ./cub3D "$f" >/dev/null 2>&1
-    if [ $? -eq 0 ]; then echo "FAIL: $f should have errored"; fi
+# Every invalid file must exit non-zero with "Error\n..."
+for f in maps/invalid/bad/*.cub maps/invalid/map_tests/*.cub \
+         maps/invalid/texture_tests/*.cub maps/invalid/color_tests/*.cub; do
+    if ./cub3D "$f" >/dev/null 2>&1; then
+        echo "FAIL: $f should have errored"
+    fi
 done
 
-# All valid maps must open the window
+# Every valid file must open the window
 for f in maps/valid/*.cub; do
     ./cub3D "$f"
 done
 ```
+
+**Reclassifications expected under the new tab stance:**
+
+- `map_tests/test4.cub` — has `1P1` (the `P` is the failure, not the tabs). Move to `valid/` if you fix the typo to `1N1`; otherwise it stays invalid because `P` isn't in the allowed set. ❓ pending decision.
+- `map_tests/test15.cub` — leading tabs only, otherwise a closed `1N1` 3×3 room. Under the tab-as-space rule, this is **valid**. Move to `maps/valid/`.
 
 **Leak check on error paths** (macOS):
 
@@ -235,10 +265,9 @@ for f in maps/invalid/bad/*.cub; do
 done
 ```
 
-Every error path must free everything stored up to that point — Pass 1 partial stores are the leakiest area.
+Every error path must free everything stored up to that point. The leakiest area is Pass 1b's partial stores; Pass 2c only adds the player-triple integers (no allocs), so failures inside `check_map` should free the same set as `extract_data`'s success path.
 
 **Worth adding to the suite:**
-- `crlf_endings.cub` — `\r\n` line endings.
-- `valid/jagged_rows.cub` — irregular row lengths that should pass.
-- `valid/non_standard_order.cub` — F before NO, etc., still valid (confirms order independence).
-- `not_dot_cub.cub`, `something.txt` — wrong extension.
+- `valid/jagged_rows.cub` — irregular row lengths that pass closure (positive test).
+- `valid/non_standard_order.cub` — `F` before `NO`, etc., still valid.
+- `crlf_endings.cub` — `\r\n` line endings (the `normalize_row` helper should make this work transparently).
