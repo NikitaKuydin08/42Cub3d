@@ -33,6 +33,7 @@
 # define OPEN_FILE_ERR "Couldn't open the file, wrong permissions"
 # define FILE_IS_EMPTY "File is empty"
 # define ERR_MALLOC "Memory allocation error"
+// INSIDE OF FILE ERROR //
 # define MAP_NOT_LAST "Some content after map in the file"
 # define MISSING_MAP "Map doesn't exist in the file"
 # define MISSING_TEXTURE "At least one texture or rgb colours is missing"
@@ -51,6 +52,10 @@
 # define WALL_HOLE_NORTH "Map is not surrounded by walls on the north, hole somewhere"
 # define WALL_HOLE_SOUTH "Map is not surrounded by walls on the south, hole somewhere"
 # define WALL_HOLE_EAST "Map is not surrounded by walls on the east, hole somewhere"
+# define MAP_TOO_SMALL "Map is smaller than 3 lines"
+# define WRONG_CHAR "Map composed of character(s) different from allowed [0,1,N,S,E,W]"
+# define MULTIPLE_PLAYER "Player's start position appears in the map more than once"
+# define NO_PLAYER "Map doesn't have player. Expected (N, S, E, or W)"
 
 // STRUCTURES //
 typedef struct s_texrgbinfo
@@ -68,10 +73,16 @@ typedef struct s_texrgbinfo
 
 typedef struct s_mapinfo
 {
-	int	row_count;
-	int	column_count;
+	int		row_count;
+	int		column_count;
 
 }	t_mapinfo;
+
+typedef struct s_player
+{
+	char	orientation;
+
+}	t_player;
 
 typedef struct s_data
 {
@@ -91,6 +102,7 @@ typedef struct s_data
 	bool			map_started;
 
 	t_mapinfo		mapinfo;
+	t_player		player;
 	t_texrgbinfo	texrgbinfo;
 }	t_data;
 

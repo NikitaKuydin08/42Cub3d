@@ -56,11 +56,51 @@ static int  check_borders(t_data *data, char **map)
 	return (0);
 }
 
+static int	check_elements(t_data *data, char **map)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	data->player.orientation = '0';
+	while (i < data->mapinfo.row_count)
+	{
+		j = 0;
+		while (map[i][j])
+		{
+			while (map[i][j] <= 32)
+				j++;
+			if (!ft_strchr("01NSEW", map[i][j]))
+				return (print_err_msg(WRONG_CHAR));
+			if (ft_strchr("NSEW", map[i][j]) && data->player.orientation != '0')
+				return (print_err_msg(MULTIPLE_PLAYER));
+			if (ft_strchr("NSEW", map[i][j]) && data->player.orientation == '0')
+				data->player.orientation = map[i][j];
+			j++;
+		}
+		i++;
+	}
+	if (data->player.orientation == '0')
+		return (print_err_msg(NO_PLAYER));
+	return (0);
+}
+
+static int	check_player_start_position(t_data *data, char **map)
+{
+
+}
+
 int check_map(t_data *data)
 {
 	if (!data->map)
 		return (print_err_msg(MISSING_MAP));
 	if (check_borders(data, data->map))
+		return (1);
+	if (data->mapinfo.row_count < 3)
+		return (print_err_msg(MAP_TOO_SMALL));
+	if (check_elements(data, data->map))
+		return (1);
+	if (check_player_start_position(data, data->map))
 		return (1);
 	return (0);
 }
