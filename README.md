@@ -1,6 +1,8 @@
+*This project has been created as part of the 42 curriculum by nkuydin, matnusko.*
+
 # cub3D
 
-## Installation
+## Installation Insctructions
 
 ### macOS prerequisite
 
@@ -37,7 +39,7 @@ make
 
 ---
 
-## About
+## Description
 
 **cub3D** is a 42 school project inspired by the legendary *Wolfenstein 3D* — the game that pioneered the first-person shooter genre back in 1992. The goal is to build a small graphical engine in C that renders a 3D-looking maze from a 2D map description, using the **raycasting** technique.
 
@@ -96,3 +98,7 @@ C 225,30,0
 ## Resources
 
 - [RayCasting in Cub3D Medium Tutorial](https://devabdilah.medium.com/3d-ray-casting-game-with-cub3d-7a116376056a)
+- [Someone's Readme - Good for Concepts & Ideas](https://mintlify.wiki/ibon-ira/Cub3d/introduction)
+- [Raycasting Tutorial](https://permadi.com/1996/05/ray-casting-tutorial-1/#INTRODUCTION)
+- [Lode's Computer Graphics Tutorial - RayCasting](https://lodev.org/cgtutor/raycasting.html)
+- [Someone's Cub3D Explanation](https://hackmd.io/@nszl/H1LXByIE2#Map-parsing-and-validating)
