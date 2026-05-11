@@ -59,9 +59,9 @@ Valid map is it has
 int	parsing(t_data *data, char **argv)
 {
 	if (check_file(argv[1], true))
-		ft_error(data, 1);
-    if (map_copy_into_file(argv[1], data))
-		ft_error(data, 1);
+		ft_error(data, 0);
+	if (map_copy_into_file(argv[1], data))
+		ft_error(data, 0);
 	if (extract_data_from_file(data))
 		return (free_data(data));
 	if (check_textures(&data->texrgbinfo))
@@ -80,11 +80,10 @@ int	main(int argc, char **argv)
 	data = malloc(sizeof(t_data));
 	if (!data)
 		return (1);
-	if (parsing(data, argv) != 0) // gives 0 on success
-		return (1);
+	if (parsing(data, argv) != 0)
+		return (0);
 	init_data(data);
 	init_mlx(data);
-	// print_test_map(data->map);
 	mlx_loop(data->mlx);
 	mlx_terminate(data->mlx);
 	free(data);

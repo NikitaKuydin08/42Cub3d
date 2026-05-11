@@ -14,8 +14,9 @@
 
 int	print_err_msg(char *msg)
 {
-	ft_putstr_fd("Error", 2);
-	ft_putstr_fd(msg, 2);
+	ft_putstr_fd("Error\n", 1);
+	ft_putstr_fd(msg, 1);
+	ft_putstr_fd("\n", 1);
 	return (1);
 }
 

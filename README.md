@@ -91,3 +91,8 @@ C 225,30,0
 | `D`       | Strafe right    |
 | `←` / `→` | Rotate camera   |
 | `ESC`     | Quit            |
+
+
+## Resources
+
+- [RayCasting in Cub3D Medium Tutorial](https://devabdilah.medium.com/3d-ray-casting-game-with-cub3d-7a116376056a)

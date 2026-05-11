@@ -40,22 +40,23 @@
 # define UNKNOWN_TEX "Unknown texture identifier value"
 # define DUPLICATE_TEX "Duplicate texture identifier"
 # define BAD_TEX_VALUE "Bad texture value (missing, malloc fail, or \
-	trailing garbage)"
+trailing garbage)"
 # define EXPECTED_WHITESPACE "Header identifier missing whitespace separator"
 # define MISSED_TEX "At leaast one texture is missing"
 # define INVALID_COUNT_RGB "Invalid number of rgb values, it must be exactly 3"
 # define CONTAINS_OTHER_CHAR "At least one rgb colour contains non-digit \
-	char (including signs)"
+char (including signs)"
 # define OUT_OF_RANGE "At least one of R,G,B colours is out of range [0, 255]"
 // MAPS_ERRORS //
-# define WALL_HOLE_WEST "Map is not surrounded by walls on the west, hole somewhere"
-# define WALL_HOLE_NORTH "Map is not surrounded by walls on the north, hole somewhere"
-# define WALL_HOLE_SOUTH "Map is not surrounded by walls on the south, hole somewhere"
-# define WALL_HOLE_EAST "Map is not surrounded by walls on the east, hole somewhere"
+# define WALL_HOLE_WEST "Map has a hole on the west"
+# define WALL_HOLE_NORTH "Map has a hole on the north"
+# define WALL_HOLE_SOUTH "Map has a hole on the south"
+# define WALL_HOLE_EAST "Map has a hole on the east"
 # define MAP_TOO_SMALL "Map is smaller than 3 lines"
-# define WRONG_CHAR "Map composed of character(s) different from allowed [0,1,N,S,E,W]"
-# define MULTIPLE_PLAYER "Player's start position appears in the map more than once"
+# define WRONG_CHAR "Map composed of char(s) different from [0,1,N,S,E,W]"
+# define MULTIPLE_PLAYER "Player's position appears in the map more than once"
 # define NO_PLAYER "Map doesn't have player. Expected (N, S, E, or W)"
+# define TRAPPED_PLAYER "Map doesn't have cell (0) next to player's position"
 
 // STRUCTURES //
 typedef struct s_texrgbinfo
@@ -75,12 +76,17 @@ typedef struct s_mapinfo
 {
 	int		row_count;
 	int		column_count;
+	bool	has_zero;
+	int		max_height;
+	int		max_width;
 
 }	t_mapinfo;
 
 typedef struct s_player
 {
 	char	orientation;
+	int		x;
+	int		y;
 
 }	t_player;
 
@@ -108,6 +114,9 @@ typedef struct s_data
 
 void	init_data(t_data *data);
 void	init_mlx(t_data *cub3d);
+
+// CHECK_MAP_CLOSURE //
+int		check_closure(t_data *data, char **map);
 
 // CHECK_MAP //
 int		check_map(t_data *data);

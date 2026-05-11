@@ -1,0 +1,56 @@
+Error
+At least one rgb colour contains non-digit char (including signs)
+Error
+At least one texture or rgb colours is missing
+Error
+Invalid number of rgb values, it must be exactly 3
+Error
+Invalid number of rgb values, it must be exactly 3
+Error
+At least one texture or rgb colours is missing
+Error
+File is empty
+Error
+Some content after map in the file
+Error
+Couldn't open the file, wrong permissions
+Error
+Some content after map in the file
+Error
+Some content after map in the file
+Error
+Map doesn't exist in the file
+Error
+At least one texture or rgb colours is missing
+Error
+Map is smaller than 3 lines
+Error
+Player's position appears in the map more than once
+Error
+Map doesn't have player. Expected (N, S, E, or W)
+Error
+Map has a hole on the north
+Error
+File doesn't exist
+Error
+Duplicate texture identifier
+Error
+File doesn't exist
+Error
+File doesn't exist
+Error
+At least one texture or rgb colours is missing
+Error
+At least one texture or rgb colours is missing
+Error
+File doesn't exist
+Error
+Map has a hole on the east
+Error
+Map has a hole on the north
+Error
+Map has a hole on the south
+Error
+Map has a hole on the west
+Error
+Map has a hole on the west

@@ -22,5 +22,4 @@ void	ft_putstr_fd(const char *str, int fd)
 		write(fd, &str[i], 1);
 		i++;
 	}
-	write(1, "\n", 1);
 }

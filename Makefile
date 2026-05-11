@@ -18,6 +18,7 @@ SRC = main.c \
 	parsing/helps_to_extract.c \
 	parsing/check_textures.c \
 	parsing/check_map.c \
+	parsing/check_map_closure.c \
 	utils/error.c \
 	utils/free_data.c
 
