@@ -77,7 +77,7 @@ int	main(int argc, char **argv)
 
 	if (argc != 2)
 		return (print_err_msg(USAGE));
-	data = malloc(sizeof(t_data));
+	data = ft_calloc(1, sizeof(t_data));
 	if (!data)
 		return (1);
 	if (parsing(data, argv) != 0)

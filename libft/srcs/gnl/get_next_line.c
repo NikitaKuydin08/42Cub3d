@@ -37,6 +37,7 @@ char	*ft_read_file(int fd, char *storage)
 {
 	int		bytes;
 	char	*buffer;
+	char	*tmp;
 
 	bytes = 1;
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -48,7 +49,9 @@ char	*ft_read_file(int fd, char *storage)
 		if (bytes > 0)
 		{
 			buffer[bytes] = '\0';
+			tmp = storage;
 			storage = ft_strjoin(storage, buffer);
+			free(tmp);
 		}
 		if (bytes == -1)
 			return (free(buffer), ft_free(storage));

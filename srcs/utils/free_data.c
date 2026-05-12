@@ -59,5 +59,6 @@ int	free_data(t_data *data)
 {
 	free_map(data);
 	free_texinfo(&data->texrgbinfo);
+	free(data);
 	return (1);
 }
