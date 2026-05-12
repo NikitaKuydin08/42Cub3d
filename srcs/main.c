@@ -80,9 +80,9 @@ int	main(int argc, char **argv)
 	data = ft_calloc(1, sizeof(t_data));
 	if (!data)
 		return (1);
+	init_data(data);
 	if (parsing(data, argv) != 0)
 		return (0);
-	init_data(data);
 	init_mlx(data);
 	mlx_loop(data->mlx);
 	mlx_terminate(data->mlx);

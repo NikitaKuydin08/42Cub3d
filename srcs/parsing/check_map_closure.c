@@ -16,7 +16,7 @@ static int	is_open(t_data *data, int i, int j)
 {
 	int	len;
 
-	if (i < 0 || i >= data->mapinfo.row_count)
+	if (i < 0 || i >= data->row_count)
 		return (1);
 	len = ft_strlen(data->map[i]);
 	if (j < 0 || j >= len)
@@ -46,7 +46,7 @@ int	check_closure(t_data *data, char **map)
 	int	len;
 
 	i = 0;
-	while (i < data->mapinfo.row_count)
+	while (i < data->row_count)
 	{
 		j = 0;
 		len = ft_strlen(map[i]);

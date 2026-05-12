@@ -133,7 +133,7 @@ static int	store_data(t_data *data, char *line)
 	if (!data->map[data->map_idx])
 		return (print_err_msg(ERR_MALLOC));
 	data->map_idx++;
-	data->mapinfo.row_count++;
+	data->row_count++;
 	return (0);
 }
 
@@ -142,8 +142,6 @@ int	extract_data_from_file(t_data *data)
 	int	row;
 
 	row = 0;
-	data->map_idx = 0;
-	data->map_started = false;
 	data->map = ft_calloc(data->line_count + 1, sizeof(char *));
 	if (!data->map)
 		return (print_err_msg(ERR_MALLOC));

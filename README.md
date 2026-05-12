@@ -94,6 +94,9 @@ C 225,30,0
 | `←` / `→` | Rotate camera   |
 | `ESC`     | Quit            |
 
+## Main Concepts
+
+Vector describes how much of something there is and where it is going. Vector is used for representing the direction the player is currently facing. A vector in 2D coordinate system are usually considered to be X and Y components. V = (Vx, Vy);
 
 ## Resources
 

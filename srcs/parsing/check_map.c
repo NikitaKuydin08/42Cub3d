@@ -68,7 +68,7 @@ static int	check_elements(t_data *data, char **map)
 	int	j;
 
 	i = 0;
-	while (i < data->mapinfo.row_count)
+	while (i < data->row_count)
 	{
 		j = 0;
 		while (map[i][j])
@@ -90,10 +90,9 @@ static int	check_elements(t_data *data, char **map)
 
 int	check_map(t_data *data)
 {
-	data->player.orientation = '0';
 	if (!data->map)
 		return (print_err_msg(MISSING_MAP));
-	if (data->mapinfo.row_count < 3)
+	if (data->row_count < 3)
 		return (print_err_msg(MAP_TOO_SMALL));
 	if (check_elements(data, data->map))
 		return (1);

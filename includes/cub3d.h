@@ -24,6 +24,10 @@
 # include <errno.h>
 # include <sys/stat.h>
 
+// VARIABLES //
+# define WIN_HEIGHT 800
+# define WIN_WIDTH 800
+
 // ERROR MESSAGES //
 # define USAGE "Usage: ./cub3d <path/to/map.cub>"
 # define FILE_NOT_EXIST "File doesn't exist"
@@ -72,21 +76,13 @@ typedef struct s_texrgbinfo
 
 }	t_texrgbinfo;
 
-typedef struct s_mapinfo
-{
-	int		row_count;
-	int		column_count;
-	bool	has_zero;
-	int		max_height;
-	int		max_width;
-
-}	t_mapinfo;
-
 typedef struct s_player
 {
 	char	orientation;
 	int		x;
 	int		y;
+	double	pos_x;
+	double	pos_y;
 
 }	t_player;
 
@@ -106,8 +102,8 @@ typedef struct s_data
 	int				map_idx;
 	int				map_line;
 	bool			map_started;
+	int				row_count;
 
-	t_mapinfo		mapinfo;
 	t_player		player;
 	t_texrgbinfo	texrgbinfo;
 }	t_data;

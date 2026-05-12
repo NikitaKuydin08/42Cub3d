@@ -11,7 +11,7 @@ SRCS_DIR = srcs/
 HEADERS = -I ${MLX_DIR}/include -I ${LIBFT_DIR}
 LIBS = ${MLX_DIR}/build/libmlx42.a ${LIBFT_DIR}/libft.a -pthread -lm -lglfw
 SRC = main.c \
-	init.c \
+	init_data.c \
 	parsing/permission.c \
 	parsing/map_copy.c \
 	parsing/extract_data.c \
