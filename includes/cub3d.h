@@ -61,6 +61,7 @@ char (including signs)"
 # define MULTIPLE_PLAYER "Player's position appears in the map more than once"
 # define NO_PLAYER "Map doesn't have player. Expected (N, S, E, or W)"
 # define TRAPPED_PLAYER "Map doesn't have cell (0) next to player's position"
+# define ERR_TAB "Tab character is not allowed in map, only spaces"
 
 // STRUCTURES //
 typedef struct s_texrgbinfo

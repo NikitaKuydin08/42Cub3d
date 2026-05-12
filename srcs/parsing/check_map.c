@@ -73,8 +73,11 @@ static int	check_elements(t_data *data, char **map)
 		j = 0;
 		while (map[i][j])
 		{
-			while (map[i][j] && map[i][j] <= 32)
+			while (map[i][j] && map[i][j] <= 32
+				&& map[i][j] != '\t')
 				j++;
+			if (map[i][j] == '\t')
+				return (print_err_msg(ERR_TAB));
 			if (map[i][j] == '\0')
 				break ;
 			if (check_cell(data, map, i, j))
