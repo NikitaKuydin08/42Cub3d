@@ -66,14 +66,14 @@ char (including signs)"
 // STRUCTURES //
 typedef struct s_texrgbinfo
 {
-	char	*north;
-	char	*south;
-	char	*west;
-	char	*east;
-	char	*floor;
-	char	*ceiling;
-	int		hex_floor;
-	int		hex_ceiling;
+	char		*north;
+	char		*south;
+	char		*west;
+	char		*east;
+	char		*floor;
+	char		*ceiling;
+	uint32_t	hex_floor;
+	uint32_t	hex_ceiling;
 
 }	t_texrgbinfo;
 
@@ -89,8 +89,8 @@ typedef struct s_player
 
 typedef struct s_data
 {
-	void			*mlx;
-	void			*image;
+	mlx_t			*mlx;
+	mlx_image_t		*image;
 	int				win_height;
 	int				win_width;
 
@@ -135,6 +135,9 @@ int		map_copy_into_file(char *arg, t_data *data);
 
 // PERMISSION //
 int		check_file(char *arg, bool cub);
+
+//				RENDERING - RAY CASTING				//
+void	draw_game(t_data *data);
 
 // UTILS //
 int		print_err_msg(char *msg);

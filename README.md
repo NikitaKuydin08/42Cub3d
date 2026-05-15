@@ -98,10 +98,33 @@ C 225,30,0
 
 Vector describes how much of something there is and where it is going. Vector is used for representing the direction the player is currently facing. A vector in 2D coordinate system are usually considered to be X and Y components. V = (Vx, Vy);
 
+RayCasting - technique that transform a limited form of data into a 3D projectionby tracing rays from the viewpoint into the viewing volume RayCasting is much faster than RayTracing. The first uses much smaller amount of a rays for a window than the second. 
+
+In raycasting, walls are always 90 degrees angle with the floor. Thus, the viewpoint cannot be rotated along the Z axis. 
+
+The following attributes needed before the world could be projected and rendered:
+1. Player's height, player's field of view(FOV), and player's position.
+2. Projection plane's dimension.
+3. Relationship between player and projection plane.
+
+The FOV determines how wide the player sees the world in front of him/her. We define FOV to be 60 degrees. The player's height is defined to be 32 units high. 
+
+Point of view of the player is - the player's X and Y coordinates, and teh angle that the player is facing. 
+
+The formula to calculate the length of ray is d = sqrt[(x2 - x1)^2 + (y2 - y1)^2];
+
+Add rays to each other, between them is the angle in the radians equal to 60/win_width. And number of rays will be = win_width.
+
+The height of the wall calculates depending on the length of the ray touching this wall. So, the smaller the ray, the bigger will be the wall. And vice versa.
+
+![alt text](image.png)
+
+For the determining the direction/angle the player is pointing to, which texture the player is currently looking at. We need to understand that the line is y = kx + b, where k = dy / dx.
+
 ## Resources
 
 - [RayCasting in Cub3D Medium Tutorial](https://devabdilah.medium.com/3d-ray-casting-game-with-cub3d-7a116376056a)
 - [Someone's Readme - Good for Concepts & Ideas](https://mintlify.wiki/ibon-ira/Cub3d/introduction)
-- [Raycasting Tutorial](https://permadi.com/1996/05/ray-casting-tutorial-1/#INTRODUCTION)
+- [Raycasting Tutorial. Good explanation](https://permadi.com/1996/05/ray-casting-tutorial-1/#INTRODUCTION)
 - [Lode's Computer Graphics Tutorial - RayCasting](https://lodev.org/cgtutor/raycasting.html)
 - [Someone's Cub3D Explanation](https://hackmd.io/@nszl/H1LXByIE2#Map-parsing-and-validating)

@@ -56,6 +56,33 @@ Valid map is it has
 
 // EVERYWHERE the function returns 1 on failure
 
+/*
+	draw_game will be used to draw the image into the window:
+		draw ceiling and floor;
+		do raycasting
+		put image to window
+		destroy image
+		if it is bonus
+			draw the minimap
+	this function would be the one that consists everything and loop in main
+*/
+
+void	start_game(t_data *data)
+{
+	// prep_player(data);
+	data->mlx = mlx_init(data->win_width, data->win_height, "cub3d", false);
+	if (!data->mlx)
+	{
+		ft_putstr_fd("data: Error: mlx: Could not initialize mlx", 2);
+		ft_error(data, 1);
+	}
+	draw_game(data);
+	// mlx_key_hook(data->mlx, handle_key, data);
+	mlx_loop(data->mlx);
+	mlx_terminate(data->mlx);
+	free(data);
+}
+
 int	parsing(t_data *data, char **argv)
 {
 	if (check_file(argv[1], true))
@@ -83,9 +110,6 @@ int	main(int argc, char **argv)
 	init_data(data);
 	if (parsing(data, argv) != 0)
 		return (0);
-	init_mlx(data);
-	mlx_loop(data->mlx);
-	mlx_terminate(data->mlx);
-	free(data);
+	start_game(data);
 	return (0);
 }

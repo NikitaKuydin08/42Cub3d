@@ -3,8 +3,8 @@ SO textures/yellow/yellow1.png
 WE textures/yellow/yellow2.png
 EA textures/yellow/yellow3.png
 
-F 220,100,0
-C 225,30,0				
+F 135,206,250
+C 0, 0, 166			
 
         1111111111111111111111111
         1000000000110000000000001

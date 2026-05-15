@@ -12,29 +12,6 @@
 
 #include "../includes/cub3d.h"
 
-void	init_mlx(t_data *data)
-{
-	data->mlx = mlx_init(data->win_width, data->win_height, "data", true);
-	if (!data->mlx)
-	{
-		ft_putstr_fd("data: Error: mlx: Could not initialize mlx", 2);
-		ft_error(data, 1);
-	}
-	data->image = mlx_new_image(data->mlx, data->win_width,
-			data->win_height);
-	if (!data->image)
-	{
-		ft_putstr_fd("data: Error: mlx: Could not allocate a new \
-			image buffer", 2);
-		ft_error(data, 1);
-	}
-	if (mlx_image_to_window(data->mlx, data->image, 0, 0) < 0)
-	{
-		ft_putstr_fd("data: Error: mlx: Could not draw a new image", 2);
-		ft_error(data, 1);
-	}
-}
-
 void	init_textures(t_texrgbinfo *texinfo)
 {
 	texinfo->north = NULL;

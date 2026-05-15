@@ -80,7 +80,7 @@ static int	is_rgb_value_valid(char *value)
 	return (digit && value[i] == '\0');
 }
 
-static int	convert_n_check(char **array, int *rgb)
+static int	convert_n_check(char **array, uint32_t *rgb)
 {
 	int	i;
 
@@ -97,11 +97,11 @@ static int	convert_n_check(char **array, int *rgb)
 	return (0);
 }
 
-static int	check_rgb_to_hex(char *char_colour, int *hex_colour)
+static int	check_rgb_to_hex(char *char_colour, uint32_t *hex_colour)
 {
-	char	**array;
-	int		i;
-	int		rgb[3];
+	char		**array;
+	int			i;
+	uint32_t	rgb[3];
 
 	i = 0;
 	array = ft_split(char_colour, ',');
@@ -121,7 +121,7 @@ static int	check_rgb_to_hex(char *char_colour, int *hex_colour)
 		return (1);
 	}
 	free_tab(array);
-	*hex_colour = (rgb[0] << 16) | (rgb[1] << 8) | (rgb[2]);
+	*hex_colour = (rgb[0] << 24) | (rgb[1] << 16) | (rgb[1] << 16) | (0xFF);
 	return (0);
 }
 

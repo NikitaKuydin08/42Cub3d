@@ -19,6 +19,7 @@ SRC = main.c \
 	parsing/check_textures.c \
 	parsing/check_map.c \
 	parsing/check_map_closure.c \
+	render/draw_game.c \
 	utils/error.c \
 	utils/free_data.c
 
