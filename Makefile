@@ -20,6 +20,7 @@ SRC = main.c \
 	parsing/check_map.c \
 	parsing/check_map_closure.c \
 	render/draw_game.c \
+	render/raycasting.c \
 	utils/error.c \
 	utils/free_data.c
 

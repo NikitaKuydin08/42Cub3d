@@ -27,6 +27,7 @@
 // VARIABLES //
 # define WIN_HEIGHT 800
 # define WIN_WIDTH 800
+# define FOV 60
 
 // ERROR MESSAGES //
 # define USAGE "Usage: ./cub3d <path/to/map.cub>"
@@ -105,6 +106,8 @@ typedef struct s_data
 	bool			map_started;
 	int				row_count;
 
+	bool			needs_redraw;
+
 	t_player		player;
 	t_texrgbinfo	texrgbinfo;
 }	t_data;
@@ -138,6 +141,10 @@ int		check_file(char *arg, bool cub);
 
 //				RENDERING - RAY CASTING				//
 void	draw_game(t_data *data);
+
+// CONTROLS //
+void	key_hook(mlx_key_data_t keydata, void *param);
+void	loop_hook(void *param);
 
 // UTILS //
 int		print_err_msg(char *msg);

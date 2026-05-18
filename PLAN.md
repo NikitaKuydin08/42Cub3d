@@ -61,3 +61,10 @@
 - [ ] Movement: W/A/S/D translate `pos_x/pos_y` along/perpendicular to direction vector, with wall collision
 - [ ] Rotation: left/right arrows rotate direction vector + camera plane
 - [ ] ESC and window-close button → clean exit (`mlx_close_window` + `mlx_terminate`)
+
+ - (1) Calculating distance
+    find horizontal intersection
+    find vertical intersection
+    find the nearest intersection
+(it does mean intersection of the ray/line with the wall)
+ - (2) Render based on the distance

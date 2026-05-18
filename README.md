@@ -121,6 +121,10 @@ The height of the wall calculates depending on the length of the ray touching th
 
 For the determining the direction/angle the player is pointing to, which texture the player is currently looking at. We need to understand that the line is y = kx + b, where k = dy / dx.
 
+Multiplying cos of the angle between two rays to the length of a single ray, to get rid of 'fish eye' thing. 
+
+![alt text](image-1.png)
+
 ## Resources
 
 - [RayCasting in Cub3D Medium Tutorial](https://devabdilah.medium.com/3d-ray-casting-game-with-cub3d-7a116376056a)
@@ -128,3 +132,4 @@ For the determining the direction/angle the player is pointing to, which texture
 - [Raycasting Tutorial. Good explanation](https://permadi.com/1996/05/ray-casting-tutorial-1/#INTRODUCTION)
 - [Lode's Computer Graphics Tutorial - RayCasting](https://lodev.org/cgtutor/raycasting.html)
 - [Someone's Cub3D Explanation](https://hackmd.io/@nszl/H1LXByIE2#Map-parsing-and-validating)
+- [RayCasting Crazy Explanation in Russian Language](https://www.youtube.com/watch?v=XWCHl0rpBj4)

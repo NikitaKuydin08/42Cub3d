@@ -12,60 +12,7 @@
 
 #include "../includes/cub3d.h"
 
-// 	MLX_KEY_W				= 87,
-//  MLX_KEY_A				= 65,
-// 	MLX_KEY_D				= 68,
-// 	MLX_KEY_S				= 83,
-// 	MLX_KEY_ESCAPE			= 256,
-// 	MLX_KEY_LEFT			= 263,
-// 	MLX_KEY_RIGHT			= 262,
-/*
-THE map can only consist of 6 possible characters:
-0 for an empty space
-1 for a wall
-N for spawning a player looking north
-S for spawning a player looking south
-E for spawning a player looking east
-W for spawning a player looking west
-*/
-
-/*
-	- Digital Differential Analysis (DDA) algorithm
-
-Valid map is it has 
-*/
-
-// void	print_test_map(char **map)
-// {
-// 	int	i;
-// 	int	j;
-
-// 	i = 0;
-// 	while (map[i])
-// 	{
-// 		j = 0;
-// 		while (map[i][j])
-// 		{
-// 			printf("%c", map[i][j]);
-// 			j++;
-// 		}
-// 		i++;
-// 	}
-// 	printf("\n");
-// }
-
 // EVERYWHERE the function returns 1 on failure
-
-/*
-	draw_game will be used to draw the image into the window:
-		draw ceiling and floor;
-		do raycasting
-		put image to window
-		destroy image
-		if it is bonus
-			draw the minimap
-	this function would be the one that consists everything and loop in main
-*/
 
 void	start_game(t_data *data)
 {
@@ -77,7 +24,8 @@ void	start_game(t_data *data)
 		ft_error(data, 1);
 	}
 	draw_game(data);
-	// mlx_key_hook(data->mlx, handle_key, data);
+	mlx_key_hook(data->mlx, key_hook, data);
+	mlx_loop_hook(data->mlx, loop_hook, data);
 	mlx_loop(data->mlx);
 	mlx_terminate(data->mlx);
 	free(data);
